@@ -1,0 +1,43 @@
+{
+  "name": "PZEMPlus",
+  "version": "0.1.0",
+  "description": "Arduino/ESP32 library to easily read data from Peacefair energy monitoring devices",
+  "keywords": [
+    "pzem",
+    "energy",
+    "monitoring",
+    "modbus",
+    "rtu",
+    "rs485",
+    "peacefair",
+    "arduino",
+    "esp32",
+    "pzem-004t"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lucashudson-eng/PZEMPlus.git"
+  },
+  "authors": [
+    {
+      "name": "Lucas Hudson",
+      "email": "lucashudson.eng@gmail.com",
+      "maintainer": true
+    }
+  ],
+  "license": "GPL-3.0",
+  "homepage": "https://github.com/lucashudson-eng/PZEMPlus",
+  "frameworks": [
+    "arduino"
+  ],
+  "platforms": "*",
+  "export": {
+    "include": [
+      "src/*",
+      "examples/*"
+    ]
+  },
+  "headers": [
+    "PZEMPlus.h"
+  ]
+}
