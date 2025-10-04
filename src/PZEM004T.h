@@ -27,6 +27,9 @@
 #define PZEM_FREQUENCY_RESOLUTION  0.1f
 #define PZEM_POWER_FACTOR_RESOLUTION 0.01f
 
+// Define for default configurations
+#define SAMPLE_TIME 0
+
 class PZEM004T : public RS485 {
 public:
     // Constructor
@@ -45,10 +48,13 @@ public:
     bool readAll(float* voltage, float* current, float* power, 
                  float* energy, float* frequency, float* powerFactor, bool* alarm);
     
+    // Sample time control
+    void setSampleTime(unsigned long sampleTimeMs);
+    
     // Parameter methods
-    bool setAlarmThreshold(uint16_t threshold);
+    bool setPowerAlarm(uint16_t threshold);
     bool setAddress(uint8_t newAddress);
-    uint16_t getAlarmThreshold();
+    uint16_t getPowerAlarm();
     uint8_t getAddress();
     
     // Control methods
@@ -56,6 +62,20 @@ public:
 
 private:
     uint8_t _slaveAddr;
+    
+    // Sample time control
+    unsigned long _sampleTimeMs;
+    unsigned long _lastReadTime;
+    
+    // Cached data
+    float _cachedVoltage;
+    float _cachedCurrent;
+    float _cachedPower;
+    float _cachedEnergy;
+    float _cachedFrequency;
+    float _cachedPowerFactor;
+    bool _cachedAlarm;
+    bool _dataValid;
     
     // Internal methods
     uint32_t combineRegisters(uint16_t low, uint16_t high);

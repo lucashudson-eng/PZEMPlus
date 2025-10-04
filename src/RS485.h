@@ -4,20 +4,23 @@
 #include <Arduino.h>
 
 // Modbus-RTU function codes
-#define MODBUS_READ_HOLDING_REGISTERS    0x03
-#define MODBUS_READ_INPUT_REGISTERS      0x04
-#define MODBUS_WRITE_SINGLE_REGISTER     0x06
+#define MODBUS_READ_HOLDING_REGISTERS   0x03
+#define MODBUS_READ_INPUT_REGISTERS     0x04
+#define MODBUS_WRITE_SINGLE_REGISTER    0x06
 #define MODBUS_RESET_ENERGY             0x42
 
 // Modbus error codes
 #define MODBUS_ERROR_ILLEGAL_FUNCTION    0x01
-#define MODBUS_ERROR_ILLEGAL_ADDRESS      0x02
-#define MODBUS_ERROR_ILLEGAL_DATA         0x03
-#define MODBUS_ERROR_SLAVE_ERROR          0x04
+#define MODBUS_ERROR_ILLEGAL_ADDRESS     0x02
+#define MODBUS_ERROR_ILLEGAL_DATA        0x03
+#define MODBUS_ERROR_SLAVE_ERROR         0x04
 
 // Special addresses
 #define MODBUS_BROADCAST_ADDRESS         0x00
 #define MODBUS_GENERAL_ADDRESS           0xF8
+
+// Define for default configurations
+#define TIMEOUT 100
 
 class RS485 {
 public:

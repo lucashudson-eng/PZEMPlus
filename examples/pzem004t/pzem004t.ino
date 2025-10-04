@@ -1,3 +1,24 @@
+/*
+ * PZEM-004T Example
+ * 
+ * This example demonstrates how to use the PZEMPlus library with PZEM-004T
+ * energy monitoring device. It shows both individual measurement methods
+ * and the efficient batch reading method.
+ * 
+ * Author: Lucas Hudson
+ * GitHub: https://github.com/lucashudson-eng/PZEMPlus
+ * Library Version: 0.4.0
+ * 
+ * Features Demonstrated:
+ * - Individual measurement reading (voltage, current, power, energy, frequency, power factor)
+ * - Alarm status monitoring
+ * - Device configuration (alarm threshold, address)
+ * - Batch reading for efficiency comparison
+ * - Performance timing analysis
+ * 
+ * License: GPL-3.0
+ */
+
 #define PZEM_004T
 
 #define PZEM_RX 7
@@ -27,7 +48,11 @@ void setup() {
   
   // Configure debug and timeouts
   // pzem.setDebug(true);
-  // pzem.setTimeouts(500); // 500ms timeout
+  // pzem.setTimeouts(100); // 100ms timeout to wait for response
+  
+  // Configure sample time
+  // pzem.setSampleTime(1000); // 1 second sample time for caching
+  // pzem.setSampleTime(0);    // Disable sample time (always request fresh data)
   
   Serial.println("PZEM-004T started");
   Serial.println("Waiting for measurements...");
@@ -36,7 +61,7 @@ void setup() {
 void loop() {
   Serial.println("=== Individual Methods Test ===");
   
-  // Test 1: readVoltage() - fastest
+  // Test 1: readVoltage()
   Serial.println("1. readVoltage()...");
   uint32_t startTime = millis();
   float voltage = pzem.readVoltage();
@@ -162,17 +187,17 @@ void loop() {
   
   delay(200);
   
-  // Test 8: getAlarmThreshold()
-  Serial.println("8. getAlarmThreshold()...");
+  // Test 8: getPowerAlarm()
+  Serial.println("8. getPowerAlarm()...");
   startTime = millis();
-  uint16_t alarmThreshold = pzem.getAlarmThreshold();
-  uint32_t alarmThresholdTime = millis() - startTime;
+  uint16_t powerAlarm = pzem.getPowerAlarm();
+  uint32_t powerAlarmTime = millis() - startTime;
   
-  if (alarmThreshold > 0) {
-    Serial.print("Alarm Threshold: ");
-    Serial.print(alarmThreshold);
+  if (powerAlarm > 0) {
+    Serial.print("Power Alarm: ");
+    Serial.print(powerAlarm);
     Serial.print(" W (");
-    Serial.print(alarmThresholdTime);
+    Serial.print(powerAlarmTime);
     Serial.println("ms)");
   } else {
     Serial.println("Error reading alarm threshold");
@@ -195,8 +220,8 @@ void loop() {
   
   delay(200);
   
-  // Test 10: readAll() - comparison
-  Serial.println("10. readAll() - COMPARISON...");
+  // Test 10: readAll()
+  Serial.println("10. readAll()...");
   startTime = millis();
   float voltageAll, currentAll, powerAll, energyAll, frequencyAll, powerFactorAll;
   bool alarmAll;
@@ -213,9 +238,15 @@ void loop() {
     Serial.print(energyAll, 3); Serial.print("Wh, ");
     Serial.print(frequencyAll, 1); Serial.print("Hz, ");
     Serial.print(powerFactorAll, 2); Serial.println();
+
+    if (alarmAll) {
+      Serial.println("Status: ALARM ACTIVE (");
+    } else {
+      Serial.println("Status: Normal (");
+    }
     
     // Calculate total time of individual methods
-    uint32_t totalIndividualTime = voltageTime + currentTime + powerTime + energyTime + frequencyTime + powerFactorTime;
+    uint32_t totalIndividualTime = voltageTime + currentTime + powerTime + energyTime + frequencyTime + powerFactorTime + alarmTime;
     Serial.print("Total time individual methods: ");
     Serial.print(totalIndividualTime);
     Serial.println("ms");
@@ -227,6 +258,6 @@ void loop() {
   }
   
   Serial.println("========================");
-
-  delay(3000);
+  
+  delay(1000);
 }

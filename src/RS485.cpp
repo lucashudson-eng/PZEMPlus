@@ -1,10 +1,8 @@
 #include "RS485.h"
 
 // Constructor
-RS485::RS485(Stream* serial) {
-    _serial = serial;
-    _responseTimeout = 1000;
-    _debug = false;
+RS485::RS485(Stream* serial)
+    : _serial(serial), _responseTimeout(TIMEOUT), _debug(false) {
 }
 
 // Method to read holding registers (function 0x03)
@@ -383,9 +381,6 @@ void RS485::setTimeouts(uint32_t responseTimeout) {
 void RS485::setDebug(bool enable) {
     _debug = enable;
 }
-
-
-
 
 // Debug print
 void RS485::debugPrint(const char* message) {
