@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2024-12-19
+
+### Added
+- **PZEM-003/017 Implementation**: Complete implementation for DC energy monitoring devices
+- **DC Energy Monitoring**: Support for PZEM-003 (10A range, built-in shunt) and PZEM-017 (50A-300A range, external shunt)
+- **Voltage Alarm System**: High and low voltage alarm configuration and monitoring
+- **Current Range Configuration**: Configurable current ranges for PZEM-017 (50A, 100A, 200A, 300A)
+- **DC Measurement Functions**: Voltage, current, power, and energy reading for DC applications
+- **Alarm Status Reading**: Real-time alarm status monitoring for voltage thresholds
+- **Parameter Management**: Complete parameter setting and reading for DC devices
+- **Example Implementation**: Working example for PZEM-003/017 usage
+
+### Changed
+- **Library Structure**: Enhanced modular design to support both AC and DC monitoring devices
+- **Communication Layer**: Optimized RS485 communication for DC device protocols
+- **Documentation**: Updated README with DC device information and usage examples
+
+### Fixed
+- **Device Compatibility**: Improved compatibility with DC energy monitoring devices
+- **Parameter Handling**: Enhanced parameter validation and error handling for DC devices
+
 ## [0.4.0] - 2024-12-19
 
 ### Added

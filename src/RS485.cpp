@@ -2,7 +2,7 @@
 
 // Constructor
 RS485::RS485(Stream* serial)
-    : _serial(serial), _responseTimeout(TIMEOUT), _debug(false) {
+    : _serial(serial), _responseTimeout(TIMEOUT), _debug(false), _rs485_en(-1) {
 }
 
 // Method to read holding registers (function 0x03)
@@ -30,10 +30,18 @@ bool RS485::readHoldingRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t
         _serial->read();
     }
     
+    // Enable transmit mode for sending
+    enableTransmit();
+    delay(1); // Small delay to ensure mode change
+    
     // Send request
     _serial->write(request, 8);
     _serial->flush();
     delay(10);
+    
+    // Switch to receive mode
+    enableReceive();
+    delay(1); // Small delay to ensure mode change
     
     // Receive optimized response
     uint8_t response[256];
@@ -121,10 +129,18 @@ bool RS485::readInputRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t n
         _serial->read();
     }
     
+    // Enable transmit mode for sending
+    enableTransmit();
+    delay(1); // Small delay to ensure mode change
+    
     // Send request
     _serial->write(request, 8);
     _serial->flush();
     delay(10);
+    
+    // Switch to receive mode
+    enableReceive();
+    delay(1); // Small delay to ensure mode change
     
     // Receive optimized response - exit when all bytes received
     uint8_t response[256];
@@ -211,10 +227,18 @@ bool RS485::writeSingleRegister(uint8_t slaveAddr, uint16_t regAddr, uint16_t va
         _serial->read();
     }
     
+    // Enable transmit mode for sending
+    enableTransmit();
+    delay(1); // Small delay to ensure mode change
+    
     // Send request
     _serial->write(request, 8);
     _serial->flush();
     delay(10);
+    
+    // Switch to receive mode
+    enableReceive();
+    delay(1); // Small delay to ensure mode change
     
     // Receive optimized response
     uint8_t response[8];
@@ -286,10 +310,18 @@ bool RS485::resetEnergy(uint8_t slaveAddr) {
         _serial->read();
     }
     
+    // Enable transmit mode for sending
+    enableTransmit();
+    delay(1); // Small delay to ensure mode change
+    
     // Send request
     _serial->write(request, 4);
     _serial->flush();
     delay(10);
+    
+    // Switch to receive mode
+    enableReceive();
+    delay(1); // Small delay to ensure mode change
     
     // Receive optimized response
     uint8_t response[4];
@@ -382,6 +414,17 @@ void RS485::setDebug(bool enable) {
     _debug = enable;
 }
 
+// Set enable pin for MAX485
+bool RS485::setEnable(uint8_t enablePin) {
+    if (_rs485_en >= 0) {
+        _rs485_en = enablePin;
+        pinMode(_rs485_en, OUTPUT);
+        enableReceive(); // Start in receive mode
+        return true;
+    }
+    return false;
+}
+
 // Debug print
 void RS485::debugPrint(const char* message) {
     if (_debug) {
@@ -401,4 +444,23 @@ void RS485::debugPrintHex(uint8_t* data, uint8_t length) {
         }
         Serial.println();
     }
+}
+
+// Enable transmit mode (DE/RE = HIGH)
+void RS485::enableTransmit() {
+    if (_rs485_en >= 0) {
+        digitalWrite(_rs485_en, HIGH);
+    }
+}
+
+// Enable receive mode (DE/RE = LOW)
+void RS485::enableReceive() {
+    if (_rs485_en >= 0) {
+        digitalWrite(_rs485_en, LOW);
+    }
+}
+
+// Combine two 16-bit registers into a 32-bit value
+uint32_t RS485::combineRegisters(uint16_t low, uint16_t high) {
+    return ((uint32_t)high << 16) | low;
 }

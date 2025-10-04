@@ -1,6 +1,6 @@
 {
   "name": "PZEMPlus",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Arduino/ESP32 library to easily read data from Peacefair energy monitoring devices",
   "keywords": [
     "pzem",
@@ -12,7 +12,11 @@
     "peacefair",
     "arduino",
     "esp32",
-    "pzem-004t"
+    "pzem-004t",
+    "pzem-003",
+    "pzem-017",
+    "pzem-6l24",
+    "pzem-iot-e02"
   ],
   "repository": {
     "type": "git",

@@ -36,19 +36,24 @@ public:
     // Utility methods
     uint16_t calculateCRC16(uint8_t* data, uint8_t length);
     bool verifyCRC16(uint8_t* data, uint8_t length);
-    void setTimeouts(uint32_t responseTimeout = 1000);
+    void setTimeouts(uint32_t responseTimeout);
+    uint32_t combineRegisters(uint16_t low, uint16_t high);
     
     // Configuration methods
     void setDebug(bool enable);
+    bool setEnable(uint8_t enablePin);
 
 private:
     Stream* _serial;
     uint32_t _responseTimeout;
     bool _debug;
+    uint8_t _rs485_en;
     
     // Internal methods
     void debugPrint(const char* message);
     void debugPrintHex(uint8_t* data, uint8_t length);
+    void enableTransmit();
+    void enableReceive();
 };
 
 #endif // RS485_H

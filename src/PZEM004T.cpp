@@ -2,7 +2,7 @@
 
 // Constructor
 PZEM004T::PZEM004T(Stream &serial, uint8_t slaveAddr) 
-    : RS485(&serial), _slaveAddr(slaveAddr), _sampleTimeMs(0), _lastReadTime(0) {
+    : RS485(&serial), _slaveAddr(slaveAddr), _sampleTimeMs(SAMPLE_TIME), _lastReadTime(0) {
 }
 
 // Read voltage
@@ -17,8 +17,7 @@ float PZEM004T::readVoltage() {
     } else {
         // Use sample time, call readAll to get cached data
         float voltage, current, power, energy, frequency, powerFactor;
-        bool alarm;
-        if (readAll(&voltage, &current, &power, &energy, &frequency, &powerFactor, &alarm)) {
+        if (readAll(&voltage, &current, &power, &energy, &frequency, &powerFactor)) {
             return voltage;
         }
         return -1.0f; // Error value
@@ -38,8 +37,7 @@ float PZEM004T::readCurrent() {
     } else {
         // Use sample time, call readAll to get cached data
         float voltage, current, power, energy, frequency, powerFactor;
-        bool alarm;
-        if (readAll(&voltage, &current, &power, &energy, &frequency, &powerFactor, &alarm)) {
+        if (readAll(&voltage, &current, &power, &energy, &frequency, &powerFactor)) {
             return current;
         }
         return -1.0f; // Error value
@@ -59,8 +57,7 @@ float PZEM004T::readPower() {
     } else {
         // Use sample time, call readAll to get cached data
         float voltage, current, power, energy, frequency, powerFactor;
-        bool alarm;
-        if (readAll(&voltage, &current, &power, &energy, &frequency, &powerFactor, &alarm)) {
+        if (readAll(&voltage, &current, &power, &energy, &frequency, &powerFactor)) {
             return power;
         }
         return -1.0f; // Error value
@@ -80,8 +77,7 @@ float PZEM004T::readEnergy() {
     } else {
         // Use sample time, call readAll to get cached data
         float voltage, current, power, energy, frequency, powerFactor;
-        bool alarm;
-        if (readAll(&voltage, &current, &power, &energy, &frequency, &powerFactor, &alarm)) {
+        if (readAll(&voltage, &current, &power, &energy, &frequency, &powerFactor)) {
             return energy;
         }
         return -1.0f; // Error value
@@ -100,8 +96,7 @@ float PZEM004T::readFrequency() {
     } else {
         // Use sample time, call readAll to get cached data
         float voltage, current, power, energy, frequency, powerFactor;
-        bool alarm;
-        if (readAll(&voltage, &current, &power, &energy, &frequency, &powerFactor, &alarm)) {
+        if (readAll(&voltage, &current, &power, &energy, &frequency, &powerFactor)) {
             return frequency;
         }
         return -1.0f; // Error value
@@ -120,8 +115,7 @@ float PZEM004T::readPowerFactor() {
     } else {
         // Use sample time, call readAll to get cached data
         float voltage, current, power, energy, frequency, powerFactor;
-        bool alarm;
-        if (readAll(&voltage, &current, &power, &energy, &frequency, &powerFactor, &alarm)) {
+        if (readAll(&voltage, &current, &power, &energy, &frequency, &powerFactor)) {
             return powerFactor;
         }
         return -1.0f; // Error value
@@ -138,11 +132,10 @@ bool PZEM004T::readAlarmStatus() {
         }
         return false; // In case of error, assume no alarm
     } else {
-        // Use sample time, call readAll to get cached data
-        float voltage, current, power, energy, frequency, powerFactor;
-        bool alarm;
-        if (readAll(&voltage, &current, &power, &energy, &frequency, &powerFactor, &alarm)) {
-            return alarm;
+        // Use sample time, read alarm directly
+        uint16_t data[1];
+        if (readInputRegisters(_slaveAddr, PZEM_ALARM_STATUS_REG, 1, data)) {
+            return (data[0] == 0xFFFF); // 0xFFFF = active alarm
         }
         return false; // In case of error, assume no alarm
     }
@@ -150,14 +143,14 @@ bool PZEM004T::readAlarmStatus() {
 
 // Read all measurements at once
 bool PZEM004T::readAll(float* voltage, float* current, float* power, 
-                       float* energy, float* frequency, float* powerFactor, bool* alarm) {
+                       float* energy, float* frequency, float* powerFactor) {
     unsigned long currentTime = millis();
     
     // Check if we need to read new data based on sample time
     if (_sampleTimeMs <= 0 || (currentTime - _lastReadTime) >= _sampleTimeMs) {
-        uint16_t data[10];
+        uint16_t data[9];
         
-        if (!readInputRegisters(_slaveAddr, PZEM_VOLTAGE_REG, 10, data)) {
+        if (!readInputRegisters(_slaveAddr, PZEM_VOLTAGE_REG, 9, data)) {
             return false;
         }
         
@@ -175,7 +168,6 @@ bool PZEM004T::readAll(float* voltage, float* current, float* power,
         
         _cachedFrequency = data[7] * PZEM_FREQUENCY_RESOLUTION;
         _cachedPowerFactor = data[8] * PZEM_POWER_FACTOR_RESOLUTION;
-        _cachedAlarm = (data[9] == 0xFFFF);
         
         _lastReadTime = currentTime;
     }
@@ -187,7 +179,6 @@ bool PZEM004T::readAll(float* voltage, float* current, float* power,
     *energy = _cachedEnergy;
     *frequency = _cachedFrequency;
     *powerFactor = _cachedPowerFactor;
-    *alarm = _cachedAlarm;
     
     return true;
 }
@@ -198,8 +189,9 @@ void PZEM004T::setSampleTime(unsigned long sampleTimeMs) {
 }
 
 // Set alarm threshold
-bool PZEM004T::setPowerAlarm(uint16_t threshold) {
-    return writeSingleRegister(_slaveAddr, PZEM_ALARM_THRESHOLD_REG, threshold);
+bool PZEM004T::setPowerAlarm(float threshold) {
+    uint16_t thresholdRaw = (uint16_t)(threshold / PZEM_POWER_ALARM_RESOLUTION); // Convert watts to raw value
+    return writeSingleRegister(_slaveAddr, PZEM_ALARM_THRESHOLD_REG, thresholdRaw);
 }
 
 // Set slave address
@@ -216,12 +208,12 @@ bool PZEM004T::setAddress(uint8_t newAddress) {
 }
 
 // Get alarm threshold
-uint16_t PZEM004T::getPowerAlarm() {
+float PZEM004T::getPowerAlarm() {
     uint16_t data[1];
     if (readHoldingRegisters(_slaveAddr, PZEM_ALARM_THRESHOLD_REG, 1, data)) {
-        return data[0];
+        return data[0] * PZEM_POWER_ALARM_RESOLUTION; // Convert raw value to watts
     }
-    return 0; // Error value
+    return -1.0f; // Error value
 }
 
 // Get slave address
@@ -238,7 +230,3 @@ bool PZEM004T::resetEnergy() {
     return RS485::resetEnergy(_slaveAddr);
 }
 
-// Internal method to combine 16-bit registers into 32 bits
-uint32_t PZEM004T::combineRegisters(uint16_t low, uint16_t high) {
-    return ((uint32_t)high << 16) | low;
-}

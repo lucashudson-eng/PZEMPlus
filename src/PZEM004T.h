@@ -23,6 +23,7 @@
 #define PZEM_VOLTAGE_RESOLUTION    0.1f
 #define PZEM_CURRENT_RESOLUTION    0.001f
 #define PZEM_POWER_RESOLUTION      0.1f
+#define PZEM_POWER_ALARM_RESOLUTION 1.0f
 #define PZEM_ENERGY_RESOLUTION     1.0f
 #define PZEM_FREQUENCY_RESOLUTION  0.1f
 #define PZEM_POWER_FACTOR_RESOLUTION 0.01f
@@ -46,15 +47,15 @@ public:
     
     // Method to read all measurements at once
     bool readAll(float* voltage, float* current, float* power, 
-                 float* energy, float* frequency, float* powerFactor, bool* alarm);
+                 float* energy, float* frequency, float* powerFactor);
     
     // Sample time control
     void setSampleTime(unsigned long sampleTimeMs);
     
     // Parameter methods
-    bool setPowerAlarm(uint16_t threshold);
+    bool setPowerAlarm(float threshold);
     bool setAddress(uint8_t newAddress);
-    uint16_t getPowerAlarm();
+    float getPowerAlarm();
     uint8_t getAddress();
     
     // Control methods
@@ -74,11 +75,6 @@ private:
     float _cachedEnergy;
     float _cachedFrequency;
     float _cachedPowerFactor;
-    bool _cachedAlarm;
-    bool _dataValid;
-    
-    // Internal methods
-    uint32_t combineRegisters(uint16_t low, uint16_t high);
 };
 
 #endif // PZEM004T_H
