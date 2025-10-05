@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.3] - 2025-01-27
+
+### Improved
+- **Communication Optimization**: Enhanced RS485 communication with intelligent response detection
+- **Timeout Management**: Optimized timeout handling for better performance and reliability
+- **Response Detection**: Improved logic to detect response completion based on inactivity time
+- **Code Cleanup**: Removed unused code and optimized memory usage
+- **Example Enhancement**: Updated examples with better performance metrics and timeout configuration
+
+### Fixed
+- **Response Reading**: Enhanced reading logic to always wait for slaveAddr byte at the beginning of response
+- **Communication Stability**: Improved RS485 communication reliability with better error handling
+- **Timeout Issues**: Fixed timeout management for more consistent communication
+
 ## [0.5.2] - 2025-01-27
 
 ### Fixed

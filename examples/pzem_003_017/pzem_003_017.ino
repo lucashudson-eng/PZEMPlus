@@ -44,6 +44,9 @@ void setup(){
   pzem.setEnable(PZEM_RS485_EN);
 #endif
 
+  // Set address to 0x01
+  // pzem.setAddress(0x01);
+
   // Set current range to 50, 100, 200 or 300A (PZEM-017 only)
   // pzem.setCurrentRange(300);
 

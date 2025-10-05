@@ -6,17 +6,14 @@
 // PZEM-004T register addresses
 #define PZEM_VOLTAGE_REG         0x0000
 #define PZEM_CURRENT_LOW_REG      0x0001
-#define PZEM_CURRENT_HIGH_REG     0x0002
 #define PZEM_POWER_LOW_REG        0x0003
-#define PZEM_POWER_HIGH_REG       0x0004
 #define PZEM_ENERGY_LOW_REG       0x0005
-#define PZEM_ENERGY_HIGH_REG      0x0006
 #define PZEM_FREQUENCY_REG        0x0007
 #define PZEM_POWER_FACTOR_REG     0x0008
-#define PZEM_ALARM_STATUS_REG     0x0009
+#define PZEM_POWER_ALARM_REG     0x0009
 
 // Parameter registers
-#define PZEM_ALARM_THRESHOLD_REG  0x0001
+#define PZEM_POWER_THRESHOLD_REG  0x0001
 #define PZEM_ADDRESS_REG          0x0002
 
 // Resolutions according to manual
@@ -28,15 +25,12 @@
 #define PZEM_FREQUENCY_RESOLUTION  0.1f
 #define PZEM_POWER_FACTOR_RESOLUTION 0.01f
 
-// Define for default configurations
-#define SAMPLE_TIME 0
-
 class PZEM004T : public RS485 {
 public:
-    // Constructor
-    #if defined(__AVR_ATmega328P__) 
+    // Constructors
+#if defined(__AVR_ATmega328P__) 
     PZEM004T(SoftwareSerial &serial, uint8_t slaveAddr = 0xF8);
-    #else
+#else
     PZEM004T(HardwareSerial &serial, uint8_t slaveAddr = 0xF8);
     PZEM004T(HardwareSerial &serial, uint8_t rxPin, uint8_t txPin, uint8_t slaveAddr = 0xF8);
     #endif

@@ -2,7 +2,7 @@
 
 // Constructor
 RS485::RS485(Stream* serial)
-    : _serial(serial), _responseTimeout(TIMEOUT), _rs485_en(-1) {
+    : _serial(serial), _responseTimeout(100), _rs485_en(-1) {
 }
 
 // Method to read holding registers (function 0x03)
@@ -26,7 +26,6 @@ bool RS485::readHoldingRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t
     
     // Enable transmit mode for sending
     enableTransmit();
-    delay(1); // Small delay to ensure mode change
     
     // Send request
     _serial->write(request, 8);
@@ -35,7 +34,6 @@ bool RS485::readHoldingRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t
     
     // Switch to receive mode
     enableReceive();
-    delay(1); // Small delay to ensure mode change
     
     // Receive optimized response
     uint8_t response[256];
@@ -51,17 +49,11 @@ bool RS485::readHoldingRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t
     while (millis() - startTime < _responseTimeout) {
         if (_serial->available()) {
             uint8_t byte = _serial->read();
+
+            if (!foundSlaveAddr && byte == slaveAddr)
+                foundSlaveAddr = true;
             
-            if (!foundSlaveAddr) {
-                // Wait for the response to start with slaveAddr
-                if (byte == slaveAddr) {
-                    foundSlaveAddr = true;
-                    response[0] = byte;
-                    responseLength = 1;
-                    lastByteTime = millis();
-                }
-            } else {
-                // Continue reading after finding slaveAddr
+            if (foundSlaveAddr) {
                 if (responseLength < sizeof(response)) {
                     response[responseLength] = byte;
                     responseLength++;
@@ -71,8 +63,8 @@ bool RS485::readHoldingRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t
         }
         
         // If received all expected bytes and passed time without new bytes
-        if (foundSlaveAddr && responseLength >= minBytesExpected && (millis() - lastByteTime) > 10) {
-            break; // Exit loop - complete response
+        if (responseLength >= minBytesExpected && (millis() - lastByteTime) > 10) {
+            break;
         }
     }
     
@@ -126,7 +118,6 @@ bool RS485::readInputRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t n
     
     // Enable transmit mode for sending
     enableTransmit();
-    delay(1); // Small delay to ensure mode change
     
     // Send request
     _serial->write(request, 8);
@@ -135,7 +126,6 @@ bool RS485::readInputRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t n
     
     // Switch to receive mode
     enableReceive();
-    delay(1); // Small delay to ensure mode change
     
     // Receive optimized response - exit when all bytes received
     uint8_t response[256];
@@ -152,16 +142,10 @@ bool RS485::readInputRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t n
         if (_serial->available()) {
             uint8_t byte = _serial->read();
             
-            if (!foundSlaveAddr) {
-                // Wait for the response to start with slaveAddr
-                if (byte == slaveAddr) {
-                    foundSlaveAddr = true;
-                    response[0] = byte;
-                    responseLength = 1;
-                    lastByteTime = millis();
-                }
-            } else {
-                // Continue reading after finding slaveAddr
+            if (!foundSlaveAddr && byte == slaveAddr)
+                foundSlaveAddr = true;
+            
+            if (foundSlaveAddr) {
                 if (responseLength < sizeof(response)) {
                     response[responseLength] = byte;
                     responseLength++;
@@ -171,8 +155,8 @@ bool RS485::readInputRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t n
         }
         
         // If received all expected bytes and passed time without new bytes
-        if (foundSlaveAddr && responseLength >= minBytesExpected && (millis() - lastByteTime) > 10) {
-            break; // Exit loop - complete response
+        if (responseLength >= minBytesExpected && (millis() - lastByteTime) > 10) {
+            break;
         }
     }
     
@@ -225,7 +209,6 @@ bool RS485::writeSingleRegister(uint8_t slaveAddr, uint16_t regAddr, uint16_t va
     
     // Enable transmit mode for sending
     enableTransmit();
-    delay(1); // Small delay to ensure mode change
     
     // Send request
     _serial->write(request, 8);
@@ -234,7 +217,6 @@ bool RS485::writeSingleRegister(uint8_t slaveAddr, uint16_t regAddr, uint16_t va
     
     // Switch to receive mode
     enableReceive();
-    delay(1); // Small delay to ensure mode change
     
     // Receive optimized response
     uint8_t response[8];
@@ -247,21 +229,15 @@ bool RS485::writeSingleRegister(uint8_t slaveAddr, uint16_t regAddr, uint16_t va
 
     bool foundSlaveAddr = false;
     
-    // 300ms timeout to wait for response, avoid setting TIMEOUT to low
+    // 300ms timeout to wait for response, avoid setting _responseTimeout to low
     while (millis() - startTime < 300) {
         if (_serial->available()) {
             uint8_t byte = _serial->read();
             
-            if (!foundSlaveAddr) {
-                // Wait for the response to start with slaveAddr
-                if (byte == slaveAddr) {
-                    foundSlaveAddr = true;
-                    response[0] = byte;
-                    responseLength = 1;
-                    lastByteTime = millis();
-                }
-            } else {
-                // Continue reading after finding slaveAddr
+            if (!foundSlaveAddr && byte == slaveAddr)
+                foundSlaveAddr = true;
+            
+            if (foundSlaveAddr) {
                 if (responseLength < sizeof(response)) {
                     response[responseLength] = byte;
                     responseLength++;
@@ -271,7 +247,7 @@ bool RS485::writeSingleRegister(uint8_t slaveAddr, uint16_t regAddr, uint16_t va
         }
         
         // If received all expected bytes and passed time without new bytes
-        if (foundSlaveAddr && responseLength >= minBytesExpected && (millis() - lastByteTime) > 10) {
+        if (responseLength >= minBytesExpected && (millis() - lastByteTime) > 10) {
             break;
         }
     }
@@ -310,7 +286,6 @@ bool RS485::resetEnergy(uint8_t slaveAddr) {
     
     // Enable transmit mode for sending
     enableTransmit();
-    delay(1); // Small delay to ensure mode change
     
     // Send request
     _serial->write(request, 4);
@@ -319,7 +294,6 @@ bool RS485::resetEnergy(uint8_t slaveAddr) {
     
     // Switch to receive mode
     enableReceive();
-    delay(1); // Small delay to ensure mode change
     
     // Receive optimized response
     uint8_t response[4];
@@ -332,21 +306,15 @@ bool RS485::resetEnergy(uint8_t slaveAddr) {
 
     bool foundSlaveAddr = false;
     
-    // 300ms timeout to wait for response, avoid setting TIMEOUT to low
+    // 300ms timeout to wait for response, avoid setting _responseTimeout to low
     while (millis() - startTime < 300) {
         if (_serial->available()) {
             uint8_t byte = _serial->read();
             
-            if (!foundSlaveAddr) {
-                // Wait for the response to start with slaveAddr
-                if (byte == slaveAddr) {
-                    foundSlaveAddr = true;
-                    response[0] = byte;
-                    responseLength = 1;
-                    lastByteTime = millis();
-                }
-            } else {
-                // Continue reading after finding slaveAddr
+            if (!foundSlaveAddr && byte == slaveAddr)
+                foundSlaveAddr = true;
+            
+            if (foundSlaveAddr) {
                 if (responseLength < sizeof(response)) {
                     response[responseLength] = byte;
                     responseLength++;
@@ -356,7 +324,7 @@ bool RS485::resetEnergy(uint8_t slaveAddr) {
         }
         
         // If received all expected bytes and passed time without new bytes
-        if (foundSlaveAddr && responseLength >= minBytesExpected && (millis() - lastByteTime) > 10) {
+        if (responseLength >= minBytesExpected && (millis() - lastByteTime) > 10) {
             break;
         }
     }
@@ -430,6 +398,7 @@ bool RS485::setEnable(uint8_t enablePin) {
 void RS485::enableTransmit() {
     if (_rs485_en >= 0) {
         digitalWrite(_rs485_en, HIGH);
+        delay(1); // Small delay to ensure mode change
     }
 }
 
@@ -437,6 +406,7 @@ void RS485::enableTransmit() {
 void RS485::enableReceive() {
     if (_rs485_en >= 0) {
         digitalWrite(_rs485_en, LOW);
+        delay(1); // Small delay to ensure mode change
     }
 }
 

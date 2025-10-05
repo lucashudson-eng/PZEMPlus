@@ -1,16 +1,16 @@
 #include "PZEM004T.h"
 
-// Constructor
+// Constructors
 #if defined(__AVR_ATmega328P__)
 PZEM004T::PZEM004T(SoftwareSerial &serial, uint8_t slaveAddr) 
-    : RS485(&serial), _slaveAddr(slaveAddr), _sampleTimeMs(SAMPLE_TIME), _lastReadTime(0) {
+    : RS485(&serial), _slaveAddr(slaveAddr), _sampleTimeMs(0), _lastReadTime(0) {
 }
 #else
 PZEM004T::PZEM004T(HardwareSerial &serial, uint8_t slaveAddr) 
-    : RS485(&serial), _slaveAddr(slaveAddr), _sampleTimeMs(SAMPLE_TIME), _lastReadTime(0), _rxPin(-1), _txPin(-1) {
+    : RS485(&serial), _slaveAddr(slaveAddr), _sampleTimeMs(0), _lastReadTime(0), _rxPin(-1), _txPin(-1) {
 }
 PZEM004T::PZEM004T(HardwareSerial &serial, uint8_t rxPin, uint8_t txPin, uint8_t slaveAddr) 
-    : RS485(&serial), _slaveAddr(slaveAddr), _sampleTimeMs(SAMPLE_TIME), _lastReadTime(0), _rxPin(rxPin), _txPin(txPin) {
+    : RS485(&serial), _slaveAddr(slaveAddr), _sampleTimeMs(0), _lastReadTime(0), _rxPin(rxPin), _txPin(txPin) {
 }
 #endif
 
@@ -35,15 +35,14 @@ float PZEM004T::readVoltage() {
         if (readInputRegisters(_slaveAddr, PZEM_VOLTAGE_REG, 1, data)) {
             return data[0] * PZEM_VOLTAGE_RESOLUTION;
         }
-        return -1.0f; // Error value
     } else {
         // Use sample time, call readAll to get cached data
         float voltage, current, power, energy, frequency, powerFactor;
         if (readAll(&voltage, &current, &power, &energy, &frequency, &powerFactor)) {
             return voltage;
         }
-        return -1.0f; // Error value
     }
+    return -1.0f; // Error value
 }
 
 // Read current
@@ -55,15 +54,14 @@ float PZEM004T::readCurrent() {
             uint32_t currentRaw = combineRegisters(data[0], data[1]);
             return currentRaw * PZEM_CURRENT_RESOLUTION;
         }
-        return -1.0f; // Error value
     } else {
         // Use sample time, call readAll to get cached data
         float voltage, current, power, energy, frequency, powerFactor;
         if (readAll(&voltage, &current, &power, &energy, &frequency, &powerFactor)) {
             return current;
         }
-        return -1.0f; // Error value
     }
+    return -1.0f; // Error value
 }
 
 // Read power
@@ -75,15 +73,14 @@ float PZEM004T::readPower() {
             uint32_t powerRaw = combineRegisters(data[0], data[1]);
             return powerRaw * PZEM_POWER_RESOLUTION;
         }
-        return -1.0f; // Error value
     } else {
         // Use sample time, call readAll to get cached data
         float voltage, current, power, energy, frequency, powerFactor;
         if (readAll(&voltage, &current, &power, &energy, &frequency, &powerFactor)) {
             return power;
         }
-        return -1.0f; // Error value
     }
+    return -1.0f; // Error value
 }
 
 // Read energy
@@ -95,15 +92,14 @@ float PZEM004T::readEnergy() {
             uint32_t energyRaw = combineRegisters(data[0], data[1]);
             return energyRaw * PZEM_ENERGY_RESOLUTION;
         }
-        return -1.0f; // Error value
     } else {
         // Use sample time, call readAll to get cached data
         float voltage, current, power, energy, frequency, powerFactor;
         if (readAll(&voltage, &current, &power, &energy, &frequency, &powerFactor)) {
             return energy;
         }
-        return -1.0f; // Error value
     }
+    return -1.0f; // Error value
 }
 
 // Read frequency
@@ -114,15 +110,14 @@ float PZEM004T::readFrequency() {
         if (readInputRegisters(_slaveAddr, PZEM_FREQUENCY_REG, 1, data)) {
             return data[0] * PZEM_FREQUENCY_RESOLUTION;
         }
-        return -1.0f; // Error value
     } else {
         // Use sample time, call readAll to get cached data
         float voltage, current, power, energy, frequency, powerFactor;
         if (readAll(&voltage, &current, &power, &energy, &frequency, &powerFactor)) {
             return frequency;
         }
-        return -1.0f; // Error value
     }
+    return -1.0f; // Error value
 }
 
 // Read power factor
@@ -133,34 +128,23 @@ float PZEM004T::readPowerFactor() {
         if (readInputRegisters(_slaveAddr, PZEM_POWER_FACTOR_REG, 1, data)) {
             return data[0] * PZEM_POWER_FACTOR_RESOLUTION;
         }
-        return -1.0f; // Error value
     } else {
         // Use sample time, call readAll to get cached data
         float voltage, current, power, energy, frequency, powerFactor;
         if (readAll(&voltage, &current, &power, &energy, &frequency, &powerFactor)) {
             return powerFactor;
         }
-        return -1.0f; // Error value
     }
+    return -1.0f; // Error value
 }
 
 // Read power alarm status
 bool PZEM004T::readPowerAlarm() {
-    if (_sampleTimeMs <= 0) {
-        // Sample time disabled, read directly
-        uint16_t data[1];
-        if (readInputRegisters(_slaveAddr, PZEM_ALARM_STATUS_REG, 1, data)) {
-            return (data[0] == 0xFFFF); // 0xFFFF = active alarm
-        }
-        return false; // In case of error, assume no alarm
-    } else {
-        // Use sample time, read alarm directly
-        uint16_t data[1];
-        if (readInputRegisters(_slaveAddr, PZEM_ALARM_STATUS_REG, 1, data)) {
-            return (data[0] == 0xFFFF); // 0xFFFF = active alarm
-        }
-        return false; // In case of error, assume no alarm
+    uint16_t data[1];
+    if (readInputRegisters(_slaveAddr, PZEM_POWER_ALARM_REG, 1, data)) {
+        return (data[0] == 0xFFFF); // 0xFFFF = active alarm
     }
+    return false; // In case of error, assume no alarm
 }
 
 // Read all measurements at once
@@ -213,7 +197,7 @@ void PZEM004T::setSampleTime(unsigned long sampleTimeMs) {
 // Set alarm threshold
 bool PZEM004T::setPowerAlarm(float threshold) {
     uint16_t thresholdRaw = (uint16_t)(threshold / PZEM_POWER_ALARM_RESOLUTION); // Convert watts to raw value
-    return writeSingleRegister(_slaveAddr, PZEM_ALARM_THRESHOLD_REG, thresholdRaw);
+    return writeSingleRegister(_slaveAddr, PZEM_POWER_THRESHOLD_REG, thresholdRaw);
 }
 
 // Set slave address
@@ -232,7 +216,7 @@ bool PZEM004T::setAddress(uint8_t newAddress) {
 // Get power alarm threshold
 float PZEM004T::getPowerAlarm() {
     uint16_t data[1];
-    if (readHoldingRegisters(_slaveAddr, PZEM_ALARM_THRESHOLD_REG, 1, data)) {
+    if (readHoldingRegisters(_slaveAddr, PZEM_POWER_THRESHOLD_REG, 1, data)) {
         return data[0] * PZEM_POWER_ALARM_RESOLUTION; // Convert raw value to watts
     }
     return -1.0f; // Error value

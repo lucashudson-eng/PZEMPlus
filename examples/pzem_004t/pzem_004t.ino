@@ -36,6 +36,10 @@ void setup(){
 
   pzem.begin();
 
+  // Set address to 0x01
+  // pzem.setAddress(0x01);
+
+  // Set address to 0x01
   // Set power alarm threshold
   // pzem.setPowerAlarm(2300);
 

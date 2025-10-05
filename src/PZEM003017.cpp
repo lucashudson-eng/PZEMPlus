@@ -1,16 +1,16 @@
 #include "PZEM003017.h"
 
-// Constructor
+// Constructors
 #if defined(__AVR_ATmega328P__)
 PZEM003017::PZEM003017(SoftwareSerial &serial, uint8_t slaveAddr) 
-    : RS485(&serial), _slaveAddr(slaveAddr), _sampleTimeMs(SAMPLE_TIME), _lastReadTime(0) {
+    : RS485(&serial), _slaveAddr(slaveAddr), _sampleTimeMs(0), _lastReadTime(0) {
 }
 #else
 PZEM003017::PZEM003017(HardwareSerial &serial, uint8_t slaveAddr) 
-    : RS485(&serial), _slaveAddr(slaveAddr), _sampleTimeMs(SAMPLE_TIME), _lastReadTime(0), _rxPin(-1), _txPin(-1) {
+    : RS485(&serial), _slaveAddr(slaveAddr), _sampleTimeMs(0), _lastReadTime(0), _rxPin(-1), _txPin(-1) {
 }
 PZEM003017::PZEM003017(HardwareSerial &serial, uint8_t rxPin, uint8_t txPin, uint8_t slaveAddr) 
-    : RS485(&serial), _slaveAddr(slaveAddr), _sampleTimeMs(SAMPLE_TIME), _lastReadTime(0), _rxPin(rxPin), _txPin(txPin) {
+    : RS485(&serial), _slaveAddr(slaveAddr), _sampleTimeMs(0), _lastReadTime(0), _rxPin(rxPin), _txPin(txPin) {
 }
 #endif
 
@@ -35,15 +35,14 @@ float PZEM003017::readVoltage() {
         if (readInputRegisters(_slaveAddr, PZEM_VOLTAGE_REG, 1, data)) {
             return data[0] * PZEM_VOLTAGE_RESOLUTION;
         }
-        return -1.0f; // Error value
     } else {
         // Use sample time, call readAll to get cached data
         float voltage, current, power, energy;
         if (readAll(&voltage, &current, &power, &energy)) {
             return voltage;
         }
-        return -1.0f; // Error value
     }
+    return -1.0f; // Error value
 }
 
 // Read current
@@ -54,15 +53,14 @@ float PZEM003017::readCurrent() {
         if (readInputRegisters(_slaveAddr, PZEM_CURRENT_REG, 1, data)) {
             return data[0] * PZEM_CURRENT_RESOLUTION;
         }
-        return -1.0f; // Error value
     } else {
         // Use sample time, call readAll to get cached data
         float voltage, current, power, energy;
         if (readAll(&voltage, &current, &power, &energy)) {
             return current;
         }
-        return -1.0f; // Error value
     }
+    return -1.0f; // Error value
 }
 
 // Read power
@@ -74,15 +72,14 @@ float PZEM003017::readPower() {
             uint32_t powerRaw = combineRegisters(data[0], data[1]);
             return powerRaw * PZEM_POWER_RESOLUTION;
         }
-        return -1.0f; // Error value
     } else {
         // Use sample time, call readAll to get cached data
         float voltage, current, power, energy;
         if (readAll(&voltage, &current, &power, &energy)) {
             return power;
         }
-        return -1.0f; // Error value
     }
+    return -1.0f; // Error value
 }
 
 // Read energy
@@ -94,53 +91,32 @@ float PZEM003017::readEnergy() {
             uint32_t energyRaw = combineRegisters(data[0], data[1]);
             return energyRaw * PZEM_ENERGY_RESOLUTION;
         }
-        return -1.0f; // Error value
     } else {
         // Use sample time, call readAll to get cached data
         float voltage, current, power, energy;
         if (readAll(&voltage, &current, &power, &energy)) {
             return energy;
         }
-        return -1.0f; // Error value
     }
+    return -1.0f; // Error value
 }
 
 // Read high voltage alarm status
 bool PZEM003017::readHighVoltageAlarm() {
-    if (_sampleTimeMs <= 0) {
-        // Sample time disabled, read directly
-        uint16_t data[1];
-        if (readInputRegisters(_slaveAddr, PZEM_HIGH_VOLTAGE_ALARM_REG, 1, data)) {
-            return (data[0] == 0xFFFF); // 0xFFFF = active alarm
-        }
-        return false; // In case of error, assume no alarm
-    } else {
-        // Use sample time, read alarm directly
-        uint16_t data[1];
-        if (readInputRegisters(_slaveAddr, PZEM_HIGH_VOLTAGE_ALARM_REG, 1, data)) {
-            return (data[0] == 0xFFFF); // 0xFFFF = active alarm
-        }
-        return false; // In case of error, assume no alarm
+    uint16_t data[1];
+    if (readInputRegisters(_slaveAddr, PZEM_HIGH_VOLTAGE_ALARM_REG, 1, data)) {
+        return (data[0] == 0xFFFF); // 0xFFFF = active alarm
     }
+    return false; // In case of error, assume no alarm
 }
 
 // Read low voltage alarm status
 bool PZEM003017::readLowVoltageAlarm() {
-    if (_sampleTimeMs <= 0) {
-        // Sample time disabled, read directly
-        uint16_t data[1];
-        if (readInputRegisters(_slaveAddr, PZEM_LOW_VOLTAGE_ALARM_REG, 1, data)) {
-            return (data[0] == 0xFFFF); // 0xFFFF = active alarm
-        }
-        return false; // In case of error, assume no alarm
-    } else {
-        // Use sample time, read alarm directly
-        uint16_t data[1];
-        if (readInputRegisters(_slaveAddr, PZEM_LOW_VOLTAGE_ALARM_REG, 1, data)) {
-            return (data[0] == 0xFFFF); // 0xFFFF = active alarm
-        }
-        return false; // In case of error, assume no alarm
+    uint16_t data[1];
+    if (readInputRegisters(_slaveAddr, PZEM_LOW_VOLTAGE_ALARM_REG, 1, data)) {
+        return (data[0] == 0xFFFF); // 0xFFFF = active alarm
     }
+    return false; // In case of error, assume no alarm
 }
 
 // Read all measurements at once
