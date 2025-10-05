@@ -22,9 +22,7 @@ bool RS485::readHoldingRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t
     
     
     // Clear any remaining data in buffer before sending
-    while (_serial->available()) {
-        _serial->read();
-    }
+    clearBuffer();
     
     // Enable transmit mode for sending
     enableTransmit();
@@ -47,18 +45,33 @@ bool RS485::readHoldingRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t
     
     // Calculate minimum expected bytes: 3 (header) + 2*numRegs (data) + 2 (CRC)
     uint8_t minBytesExpected = 3 + (2 * numRegs) + 2;
+
+    bool foundSlaveAddr = false;
     
     while (millis() - startTime < _responseTimeout) {
         if (_serial->available()) {
-            if (responseLength < sizeof(response)) {
-                response[responseLength] = _serial->read();
-                responseLength++;
-                lastByteTime = millis();
+            uint8_t byte = _serial->read();
+            
+            if (!foundSlaveAddr) {
+                // Wait for the response to start with slaveAddr
+                if (byte == slaveAddr) {
+                    foundSlaveAddr = true;
+                    response[0] = byte;
+                    responseLength = 1;
+                    lastByteTime = millis();
+                }
+            } else {
+                // Continue reading after finding slaveAddr
+                if (responseLength < sizeof(response)) {
+                    response[responseLength] = byte;
+                    responseLength++;
+                    lastByteTime = millis();
+                }
             }
         }
         
         // If received all expected bytes and passed time without new bytes
-        if (responseLength >= minBytesExpected && (millis() - lastByteTime) > 10) {
+        if (foundSlaveAddr && responseLength >= minBytesExpected && (millis() - lastByteTime) > 10) {
             break; // Exit loop - complete response
         }
     }
@@ -109,9 +122,7 @@ bool RS485::readInputRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t n
     
     
     // Clear any remaining data in buffer before sending
-    while (_serial->available()) {
-        _serial->read();
-    }
+    clearBuffer();
     
     // Enable transmit mode for sending
     enableTransmit();
@@ -134,18 +145,33 @@ bool RS485::readInputRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t n
     
     // Calculate minimum expected bytes: 3 (header) + 2*numRegs (data) + 2 (CRC)
     uint8_t minBytesExpected = 3 + (2 * numRegs) + 2;
+
+    bool foundSlaveAddr = false;
     
     while (millis() - startTime < _responseTimeout) {
         if (_serial->available()) {
-            if (responseLength < sizeof(response)) {
-                response[responseLength] = _serial->read();
-                responseLength++;
-                lastByteTime = millis();
+            uint8_t byte = _serial->read();
+            
+            if (!foundSlaveAddr) {
+                // Wait for the response to start with slaveAddr
+                if (byte == slaveAddr) {
+                    foundSlaveAddr = true;
+                    response[0] = byte;
+                    responseLength = 1;
+                    lastByteTime = millis();
+                }
+            } else {
+                // Continue reading after finding slaveAddr
+                if (responseLength < sizeof(response)) {
+                    response[responseLength] = byte;
+                    responseLength++;
+                    lastByteTime = millis();
+                }
             }
         }
         
         // If received all expected bytes and passed time without new bytes
-        if (responseLength >= minBytesExpected && (millis() - lastByteTime) > 10) {
+        if (foundSlaveAddr && responseLength >= minBytesExpected && (millis() - lastByteTime) > 10) {
             break; // Exit loop - complete response
         }
     }
@@ -195,9 +221,7 @@ bool RS485::writeSingleRegister(uint8_t slaveAddr, uint16_t regAddr, uint16_t va
     
     
     // Clear any remaining data in buffer before sending
-    while (_serial->available()) {
-        _serial->read();
-    }
+    clearBuffer();
     
     // Enable transmit mode for sending
     enableTransmit();
@@ -218,21 +242,36 @@ bool RS485::writeSingleRegister(uint8_t slaveAddr, uint16_t regAddr, uint16_t va
     uint32_t startTime = millis();
     uint32_t lastByteTime = 0;
     
-    // For writeSingleRegister: 3 + 2*1 + 2 = 7 bytes minimum
-    uint8_t minBytesExpected = 7;
+    // For writeSingleRegister: 1 (address) + 1 (function) + 2 (register addr) + 2 (register value) + 2 (CRC) = 8 bytes minimum
+    uint8_t minBytesExpected = 8;
+
+    bool foundSlaveAddr = false;
     
     // 300ms timeout to wait for response, avoid setting TIMEOUT to low
     while (millis() - startTime < 300) {
         if (_serial->available()) {
-            if (responseLength < sizeof(response)) {
-                response[responseLength] = _serial->read();
-                responseLength++;
-                lastByteTime = millis();
+            uint8_t byte = _serial->read();
+            
+            if (!foundSlaveAddr) {
+                // Wait for the response to start with slaveAddr
+                if (byte == slaveAddr) {
+                    foundSlaveAddr = true;
+                    response[0] = byte;
+                    responseLength = 1;
+                    lastByteTime = millis();
+                }
+            } else {
+                // Continue reading after finding slaveAddr
+                if (responseLength < sizeof(response)) {
+                    response[responseLength] = byte;
+                    responseLength++;
+                    lastByteTime = millis();
+                }
             }
         }
         
         // If received all expected bytes and passed time without new bytes
-        if (responseLength >= minBytesExpected && (millis() - lastByteTime) > 10) {
+        if (foundSlaveAddr && responseLength >= minBytesExpected && (millis() - lastByteTime) > 10) {
             break;
         }
     }
@@ -267,9 +306,7 @@ bool RS485::resetEnergy(uint8_t slaveAddr) {
     
     
     // Clear any remaining data in buffer before sending
-    while (_serial->available()) {
-        _serial->read();
-    }
+    clearBuffer();
     
     // Enable transmit mode for sending
     enableTransmit();
@@ -290,21 +327,36 @@ bool RS485::resetEnergy(uint8_t slaveAddr) {
     uint32_t startTime = millis();
     uint32_t lastByteTime = 0;
     
-    // For resetEnergy: 3 + 0 + 2 = 5 bytes minimum
-    uint8_t minBytesExpected = 5;
+    // For resetEnergy: 1 (address) + 1 (function) + 2 (CRC) = 4 bytes minimum
+    uint8_t minBytesExpected = 4;
+
+    bool foundSlaveAddr = false;
     
     // 300ms timeout to wait for response, avoid setting TIMEOUT to low
     while (millis() - startTime < 300) {
         if (_serial->available()) {
-            if (responseLength < sizeof(response)) {
-                response[responseLength] = _serial->read();
-                responseLength++;
-                lastByteTime = millis();
+            uint8_t byte = _serial->read();
+            
+            if (!foundSlaveAddr) {
+                // Wait for the response to start with slaveAddr
+                if (byte == slaveAddr) {
+                    foundSlaveAddr = true;
+                    response[0] = byte;
+                    responseLength = 1;
+                    lastByteTime = millis();
+                }
+            } else {
+                // Continue reading after finding slaveAddr
+                if (responseLength < sizeof(response)) {
+                    response[responseLength] = byte;
+                    responseLength++;
+                    lastByteTime = millis();
+                }
             }
         }
         
         // If received all expected bytes and passed time without new bytes
-        if (responseLength >= minBytesExpected && (millis() - lastByteTime) > 10) {
+        if (foundSlaveAddr && responseLength >= minBytesExpected && (millis() - lastByteTime) > 10) {
             break;
         }
     }
@@ -385,6 +437,13 @@ void RS485::enableTransmit() {
 void RS485::enableReceive() {
     if (_rs485_en >= 0) {
         digitalWrite(_rs485_en, LOW);
+    }
+}
+
+// Clear any remaining data in buffer
+void RS485::clearBuffer() {
+    while (_serial->available()) {
+        _serial->read();
     }
 }
 

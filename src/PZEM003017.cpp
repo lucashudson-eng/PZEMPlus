@@ -24,6 +24,7 @@ void PZEM003017::begin(uint32_t baudrate){
             ((HardwareSerial*)getSerial())->begin(baudrate);
         }
     #endif
+    clearBuffer();
 }
 
 // Read voltage

@@ -41,6 +41,7 @@ public:
     bool verifyCRC16(uint8_t* data, uint8_t length);
     void setTimeouts(uint32_t responseTimeout);
     uint32_t combineRegisters(uint16_t low, uint16_t high);
+    void clearBuffer();
     
     // Configuration methods
     bool setEnable(uint8_t enablePin);
