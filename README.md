@@ -18,7 +18,7 @@ PZEMPlus is an Arduino/ESP32 library to easily read data from Peacefair energy m
 - PZEM-017 (DC, 50A/100A/200A/300A range, external shunt)
 
 ## Installation
-Install via Arduino Library Manager or download from GitHub releases. 
+Install via Arduino or PlatformIO Library Manager, or download from GitHub releases.
 
 ## Usage
 
@@ -40,7 +40,10 @@ PZEMPlus pzem(Serial2);
 
 #include <PZEMPlus.h>
 
-PZEM003017 pzem(Serial2);
+PZEMPlus pzem(Serial2);
+
+// For MAX485 module (optional)
+// pzem.setEnable(4); // Set enable pin for RS485 transceiver
 ```
 
 ### Reading Measurements
@@ -54,7 +57,7 @@ float power = pzem.readPower();
 float energy = pzem.readEnergy();
 float frequency = pzem.readFrequency();
 float powerFactor = pzem.readPowerFactor();
-bool alarm = pzem.readAlarmStatus();
+bool alarm = pzem.readPowerAlarm();
 
 // Read all measurements at once (more efficient)
 float voltage, current, power, energy, frequency, powerFactor;
@@ -103,12 +106,15 @@ pzem.setAddress(0x01);
 pzem.resetEnergy();
 
 // Get current settings
-float threshold = pzem.getPowerAlarm(); // Returns 1000.0W
+float threshold = pzem.getPowerAlarm(); // Returns 2300.0W
 uint8_t address = pzem.getAddress();
 ```
 
 #### For DC Energy Monitors (PZEM-003/017)
 ```cpp
+// For MAX485 module (optional)
+// pzem.setEnable(4); // Set enable pin for RS485 transceiver
+
 // Set voltage alarm thresholds (0.01V precision)
 pzem.setHighVoltageAlarm(300.0); // 300.00V threshold
 pzem.setLowVoltageAlarm(7.0);  // 7.00V threshold
@@ -123,8 +129,8 @@ pzem.setCurrentRange(300); // 300A range
 pzem.resetEnergy();
 
 // Get current settings
-float highThreshold = pzem.getHighVoltageAlarm(); // Returns 15.00V
-float lowThreshold = pzem.getLowVoltageAlarm();   // Returns 10.00V
+float highThreshold = pzem.getHighVoltageAlarm(); // Returns 300.00V
+float lowThreshold = pzem.getLowVoltageAlarm();   // Returns 7.00V
 uint8_t address = pzem.getAddress();
 uint16_t currentRange = pzem.getCurrentRange(); // PZEM-017 only
 ```
@@ -172,8 +178,11 @@ uint16_t currentRange = pzem.getCurrentRange(); // PZEM-017 only
 pzem.setTimeouts(100); // 100ms timeout
 
 // Configure sample time for optimized readings
-// pzem.setSampleTime(1000); // Read from device every 1000ms, use cache otherwise
-pzem.setSampleTime(0);  // Disable caching, read directly from device
+pzem.setSampleTime(1000); // Read from device every 1000ms, use cache otherwise
+// pzem.setSampleTime(0);  // Disable caching, read directly from device
+
+// For PZEM-003/017 with MAX485 module
+// pzem.setEnable(4); // Set enable pin for RS485 transceiver
 ```
 
 ## Supported Models
@@ -206,7 +215,7 @@ pzem.setSampleTime(0);  // Disable caching, read directly from device
 
 ### Implementation Status
 - ✅ **PZEM-004T**: Complete implementation with full feature set
-- ✅ **PZEM-003**: Complete implementation with full feature set
+- ✅ **PZEM-003**: Complete implementation with full feature set  
 - ✅ **PZEM-017**: Complete implementation with full feature set
 - 🚧 **PZEM-6L24**: Class structure created, implementation pending
 - 🚧 **PZIOT-E02**: Class structure created, implementation pending

@@ -19,7 +19,6 @@
 // #define PZEM_TX 3
 
 #if defined(__AVR_ATmega328P__)
-#include <SoftwareSerial.h>
 SoftwareSerial PZEM_SERIAL(PZEM_RX, PZEM_TX);
 #else
 HardwareSerial PZEM_SERIAL(2);

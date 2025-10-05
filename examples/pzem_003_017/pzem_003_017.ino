@@ -23,7 +23,6 @@
 // #define PZEM_RS485_EN 4
 
 #if defined(__AVR_ATmega328P__)
-#include <SoftwareSerial.h>
 SoftwareSerial PZEM_SERIAL(PZEM_RX, PZEM_TX);
 #else
 HardwareSerial PZEM_SERIAL(2);
