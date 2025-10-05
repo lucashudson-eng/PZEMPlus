@@ -5,7 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.5.0] - 2024-12-19
+## [0.5.1] - 2025-10-05
+
+### Fixed
+- Bug fixes and improvements for better stability and performance
+- Enhanced error handling and communication reliability
+- Improved parameter validation and data processing
+
+### Improved
+- **Examples Enhancement**: Comprehensive improvements to all example files
+- **PZEM-004T Example**: Updated with better timeout configuration (100ms default)
+- **PZEM-003/017 Example**: Enhanced with complete parameter testing and performance metrics
+- **Address Change Tool**: Improved error handling and device compatibility
+- **Documentation**: Updated README with realistic configuration examples
+- **Library Properties**: Streamlined description for better clarity
+
+## [0.5.0] - 2025-10-04
 
 ### Added
 - **PZEM-003/017 Implementation**: Complete implementation for DC energy monitoring devices
@@ -26,7 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Device Compatibility**: Improved compatibility with DC energy monitoring devices
 - **Parameter Handling**: Enhanced parameter validation and error handling for DC devices
 
-## [0.4.0] - 2024-12-19
+## [0.4.0] - 2025-10-04
 
 ### Added
 - **RS485 Communication Optimization**: Intelligent timeout implementation with automatic response end detection
@@ -46,7 +61,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Data Processing**: Improved validation and processing of Modbus responses
 - **Memory Management**: Optimized memory usage for communication operations
 
-## [0.3.0] - 2024-12-19
+## [0.3.0] - 2025-10-03
 
 ### Added
 - **PZEM-004T Implementation**: Complete class implementation with all measurement functions
@@ -55,7 +70,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Device Configuration**: Alarm threshold setting, address configuration, and energy reset
 - **Batch Reading**: Efficient method to read all measurements in a single call
 - **Error Handling**: Comprehensive error detection and timeout management
-- **Debug Support**: Built-in debugging capabilities for communication troubleshooting
 
 ### Changed
 - **Library Architecture**: Modular design with separate classes for each PZEM model
@@ -67,7 +81,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Data Processing**: Correct handling of 32-bit values from 16-bit registers
 - **Error Recovery**: Better error detection and graceful failure handling
 
-## [0.2.0] - 2024-12-19
+## [0.2.0] - 2025-10-03
 
 ### Added
 - Support for multiple PZEM models (PZEM-004T, PZEM-6L24, PZIOT-E02, PZEM-003, PZEM-017)
@@ -80,7 +94,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Library architecture to support multiple device types
 - Header file structure for better organization
 
-## [0.1.0] - 2024-12-19
+## [0.1.0] - 2025-10-02
 
 ### Added
 - Initial release

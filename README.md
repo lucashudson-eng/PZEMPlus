@@ -1,6 +1,6 @@
 # PZEMPlus
 
-![Version](https://img.shields.io/badge/version-0.5.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.5.1-blue.svg)
 ![License](https://img.shields.io/badge/license-GPL--3.0-green.svg)
 ![Platform](https://img.shields.io/badge/platform-Arduino%20%7C%20ESP32-orange.svg)
 
@@ -18,7 +18,7 @@ PZEMPlus is an Arduino/ESP32 library to easily read data from Peacefair energy m
 - PZEM-017 (DC, 50A/100A/200A/300A range, external shunt)
 
 ## Installation
-:soon: Install via Arduino Library Manager or download from GitHub releases. 
+Install via Arduino Library Manager or download from GitHub releases. 
 
 ## Usage
 
@@ -94,7 +94,7 @@ if (pzem.readAll(&voltage, &current, &power, &energy)) {
 #### For AC Energy Monitors (PZEM-004T)
 ```cpp
 // Set power alarm threshold (1W precision for alarm, 0.1W for measurements)
-pzem.setPowerAlarm(1000.0); // 1000W threshold
+pzem.setPowerAlarm(2300.0); // 2300W threshold
 
 // Change device address
 pzem.setAddress(0x01);
@@ -117,7 +117,7 @@ pzem.setLowVoltageAlarm(7.0);  // 7.00V threshold
 pzem.setAddress(0x01);
 
 // Set current range (PZEM-017 only)
-pzem.setCurrentRange(100); // 100A range
+pzem.setCurrentRange(300); // 300A range
 
 // Reset energy counter
 pzem.resetEnergy();
@@ -135,29 +135,29 @@ uint16_t currentRange = pzem.getCurrentRange(); // PZEM-017 only
 
 | Parameter | Resolution | Accuracy | Min Value | Max Value | Unit |
 |-----------|------------|----------|-----------|-----------|------|
-| Voltage | 0.1V | ±0.5% | 80.0V | 260.0V | V |
-| Current | 0.001A | ±0.5% | 0.01A (built-in) / 0.02A (external) | 10.000A (built-in) / 100.000A (external) | A |
-| Power | 0.1W | ±0.5% | 0.4W | 2300.0W (built-in) / 23000.0W (external) | W |
+| Voltage | 0.1V | ±0.5% | 80V | 260V | V |
+| Current | 0.001A | ±0.5% | 0.01A (built-in) / 0.02A (external) | 10A (built-in) / 100A (external) | A |
+| Power | 0.1W | ±0.5% | 0.4W | 2300W (built-in) / 23000W (external) | W |
 | Energy | 1Wh | ±0.5% | 0Wh | 9999999Wh | Wh |
-| Frequency | 0.1Hz | ±0.5% | 45.0Hz | 65.0Hz | Hz |
+| Frequency | 0.1Hz | ±0.5% | 45Hz | 65Hz | Hz |
 | Power Factor | 0.01 | ±1% | 0.00 | 1.00 | - |
 
 ### PZEM-003 (DC Energy Monitor)
 
 | Parameter | Resolution | Accuracy | Min Value | Max Value | Unit |
 |-----------|------------|----------|-----------|-----------|------|
-| Voltage | 0.01V | ±1% | 0.05V | 300.00V | V |
-| Current | 0.01A | ±1% | 0.01A | 10.00A | A |
-| Power | 0.1W | ±1% | 0.1W | 3000.0W | W |
+| Voltage | 0.01V | ±1% | 0.05V | 300V | V |
+| Current | 0.01A | ±1% | 0.01A | 10A | A |
+| Power | 0.1W | ±1% | 0.1W | 3000W | W |
 | Energy | 1Wh | ±1% | 0Wh | 9999999Wh | Wh |
 
 ### PZEM-017 (DC Energy Monitor)
 
 | Parameter | Resolution | Accuracy | Min Value | Max Value | Unit |
 |-----------|------------|----------|-----------|-----------|------|
-| Voltage | 0.01V | ±1% | 0.05V | 300.00V | V |
-| Current | 0.01A | ±1% | 0.02A | 300.00A | A |
-| Power | 0.1W | ±1% | 0.2W | 90000.0W | W |
+| Voltage | 0.01V | ±1% | 0.05V | 300V | V |
+| Current | 0.01A | ±1% | 0.02A | 300A | A |
+| Power | 0.1W | ±1% | 0.2W | 90000W | W |
 | Energy | 1Wh | ±1% | 0Wh | 9999999Wh | Wh |
 
 **Current Range Options for PZEM-017:**
@@ -166,23 +166,14 @@ uint16_t currentRange = pzem.getCurrentRange(); // PZEM-017 only
 - 200A range
 - 300A range
 
-### Debugging and Troubleshooting
+### Troubleshooting
 ```cpp
-// Enable debug mode for communication troubleshooting
-pzem.setDebug(true);
-
 // Configure communication timeouts (default: 100ms)
-pzem.setTimeouts(2000); // 2 seconds timeout
+pzem.setTimeouts(100); // 100ms timeout
 
 // Configure sample time for optimized readings
-pzem.setSampleTime(1000); // Read from device every 1000ms, use cache otherwise
-// pzem.setSampleTime(0);  // Disable caching, read directly from device
-
-// Debug output will show:
-// - Request/response data in hexadecimal
-// - Communication errors and timeouts
-// - CRC verification results
-// - Sample time cache hits/misses
+// pzem.setSampleTime(1000); // Read from device every 1000ms, use cache otherwise
+pzem.setSampleTime(0);  // Disable caching, read directly from device
 ```
 
 ## Supported Models

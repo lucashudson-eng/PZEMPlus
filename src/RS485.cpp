@@ -2,7 +2,7 @@
 
 // Constructor
 RS485::RS485(Stream* serial)
-    : _serial(serial), _responseTimeout(TIMEOUT), _debug(false), _rs485_en(-1) {
+    : _serial(serial), _responseTimeout(TIMEOUT), _rs485_en(-1) {
 }
 
 // Method to read holding registers (function 0x03)
@@ -20,10 +20,6 @@ bool RS485::readHoldingRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t
     request[6] = crc & 0xFF;               // CRC Low byte
     request[7] = (crc >> 8) & 0xFF;        // CRC High byte
     
-    if (_debug) {
-        debugPrint("Sending request:");
-        debugPrintHex(request, 8);
-    }
     
     // Clear any remaining data in buffer before sending
     while (_serial->available()) {
@@ -49,7 +45,7 @@ bool RS485::readHoldingRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t
     uint32_t startTime = millis();
     uint32_t lastByteTime = 0;
     
-    // Calcular bytes mínimos esperados: 3 (header) + 2*numRegs (dados) + 2 (CRC)
+    // Calculate minimum expected bytes: 3 (header) + 2*numRegs (data) + 2 (CRC)
     uint8_t minBytesExpected = 3 + (2 * numRegs) + 2;
     
     while (millis() - startTime < _responseTimeout) {
@@ -61,36 +57,28 @@ bool RS485::readHoldingRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t
             }
         }
         
-        // Se recebeu todos os bytes esperados e passou tempo sem novos bytes
+        // If received all expected bytes and passed time without new bytes
         if (responseLength >= minBytesExpected && (millis() - lastByteTime) > 10) {
-            break; // Sair do loop - resposta completa
+            break; // Exit loop - complete response
         }
     }
     
-    if (_debug) {
-        debugPrint("Response received:");
-        debugPrintHex(response, responseLength);
-        Serial.print("[RS485] Total de bytes: ");
-        Serial.println(responseLength);
-    }
     
     if (responseLength == 0) {
         return false;
     }
     
-    // Verificar se é uma resposta de erro
+    // Check if it is an error response
     if (response[1] & 0x80) {
-        debugPrint("Modbus error received");
         return false;
     }
     
-    // Verificar CRC
+    // Verify CRC
     if (!verifyCRC16(response, responseLength)) {
-        debugPrint("CRC error in response");
         return false;
     }
     
-    // Extrair dados
+    // Extract data
     uint8_t byteCount = response[2];
     uint8_t dataIndex = 0;
     
@@ -119,10 +107,6 @@ bool RS485::readInputRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t n
     request[6] = crc & 0xFF;               // CRC Low byte
     request[7] = (crc >> 8) & 0xFF;        // CRC High byte
     
-    if (_debug) {
-        debugPrint("Sending request:");
-        debugPrintHex(request, 8);
-    }
     
     // Clear any remaining data in buffer before sending
     while (_serial->available()) {
@@ -148,7 +132,7 @@ bool RS485::readInputRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t n
     uint32_t startTime = millis();
     uint32_t lastByteTime = 0;
     
-    // Calcular bytes mínimos esperados: 3 (header) + 2*numRegs (dados) + 2 (CRC)
+    // Calculate minimum expected bytes: 3 (header) + 2*numRegs (data) + 2 (CRC)
     uint8_t minBytesExpected = 3 + (2 * numRegs) + 2;
     
     while (millis() - startTime < _responseTimeout) {
@@ -160,36 +144,28 @@ bool RS485::readInputRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t n
             }
         }
         
-        // Se recebeu todos os bytes esperados e passou tempo sem novos bytes
+        // If received all expected bytes and passed time without new bytes
         if (responseLength >= minBytesExpected && (millis() - lastByteTime) > 10) {
-            break; // Sair do loop - resposta completa
+            break; // Exit loop - complete response
         }
     }
     
-    if (_debug) {
-        debugPrint("Response received:");
-        debugPrintHex(response, responseLength);
-        Serial.print("[RS485] Total de bytes: ");
-        Serial.println(responseLength);
-    }
     
     if (responseLength == 0) {
         return false;
     }
     
-    // Verificar se é uma resposta de erro
+    // Check if it is an error response
     if (response[1] & 0x80) {
-        debugPrint("Modbus error received");
         return false;
     }
     
-    // Verificar CRC
+    // Verify CRC
     if (!verifyCRC16(response, responseLength)) {
-        debugPrint("CRC error in response");
         return false;
     }
     
-    // Extrair dados
+    // Extract data
     uint8_t byteCount = response[2];
     uint8_t dataIndex = 0;
     
@@ -217,10 +193,6 @@ bool RS485::writeSingleRegister(uint8_t slaveAddr, uint16_t regAddr, uint16_t va
     request[6] = crc & 0xFF;               // CRC Low byte
     request[7] = (crc >> 8) & 0xFF;        // CRC High byte
     
-    if (_debug) {
-        debugPrint("Sending request:");
-        debugPrintHex(request, 8);
-    }
     
     // Clear any remaining data in buffer before sending
     while (_serial->available()) {
@@ -246,10 +218,11 @@ bool RS485::writeSingleRegister(uint8_t slaveAddr, uint16_t regAddr, uint16_t va
     uint32_t startTime = millis();
     uint32_t lastByteTime = 0;
     
-    // Para writeSingleRegister: 3 + 2*1 + 2 = 7 bytes mínimo
+    // For writeSingleRegister: 3 + 2*1 + 2 = 7 bytes minimum
     uint8_t minBytesExpected = 7;
     
-    while (millis() - startTime < _responseTimeout) {
+    // 300ms timeout to wait for response, avoid setting TIMEOUT to low
+    while (millis() - startTime < 300) {
         if (_serial->available()) {
             if (responseLength < sizeof(response)) {
                 response[responseLength] = _serial->read();
@@ -258,32 +231,24 @@ bool RS485::writeSingleRegister(uint8_t slaveAddr, uint16_t regAddr, uint16_t va
             }
         }
         
-        // Se recebeu todos os bytes esperados e passou tempo sem novos bytes
+        // If received all expected bytes and passed time without new bytes
         if (responseLength >= minBytesExpected && (millis() - lastByteTime) > 10) {
             break;
         }
     }
     
-    if (_debug) {
-        debugPrint("Response received:");
-        debugPrintHex(response, responseLength);
-        Serial.print("[RS485] Total de bytes: ");
-        Serial.println(responseLength);
-    }
     
     if (responseLength == 0) {
         return false;
     }
     
-    // Verificar se é uma resposta de erro
+    // Check if it is an error response
     if (response[1] & 0x80) {
-        debugPrint("Modbus error received");
         return false;
     }
     
-    // Verificar CRC
+    // Verify CRC
     if (!verifyCRC16(response, responseLength)) {
-        debugPrint("CRC error in response");
         return false;
     }
     
@@ -300,10 +265,6 @@ bool RS485::resetEnergy(uint8_t slaveAddr) {
     request[2] = crc & 0xFF;               // CRC Low byte
     request[3] = (crc >> 8) & 0xFF;        // CRC High byte
     
-    if (_debug) {
-        debugPrint("Sending request:");
-        debugPrintHex(request, 4);
-    }
     
     // Clear any remaining data in buffer before sending
     while (_serial->available()) {
@@ -329,10 +290,11 @@ bool RS485::resetEnergy(uint8_t slaveAddr) {
     uint32_t startTime = millis();
     uint32_t lastByteTime = 0;
     
-    // Para resetEnergy: 3 + 0 + 2 = 5 bytes mínimo
+    // For resetEnergy: 3 + 0 + 2 = 5 bytes minimum
     uint8_t minBytesExpected = 5;
     
-    while (millis() - startTime < _responseTimeout) {
+    // 300ms timeout to wait for response, avoid setting TIMEOUT to low
+    while (millis() - startTime < 300) {
         if (_serial->available()) {
             if (responseLength < sizeof(response)) {
                 response[responseLength] = _serial->read();
@@ -341,32 +303,24 @@ bool RS485::resetEnergy(uint8_t slaveAddr) {
             }
         }
         
-        // Se recebeu todos os bytes esperados e passou tempo sem novos bytes
+        // If received all expected bytes and passed time without new bytes
         if (responseLength >= minBytesExpected && (millis() - lastByteTime) > 10) {
             break;
         }
     }
     
-    if (_debug) {
-        debugPrint("Response received:");
-        debugPrintHex(response, responseLength);
-        Serial.print("[RS485] Total de bytes: ");
-        Serial.println(responseLength);
-    }
     
     if (responseLength == 0) {
         return false;
     }
     
-    // Verificar se é uma resposta de erro
+    // Check if it is an error response
     if (response[1] & 0x80) {
-        debugPrint("Modbus error received");
         return false;
     }
     
-    // Verificar CRC
+    // Verify CRC
     if (!verifyCRC16(response, responseLength)) {
-        debugPrint("CRC error in response");
         return false;
     }
     
@@ -409,11 +363,6 @@ void RS485::setTimeouts(uint32_t responseTimeout) {
     _responseTimeout = responseTimeout;
 }
 
-// Enable/disable debug
-void RS485::setDebug(bool enable) {
-    _debug = enable;
-}
-
 // Set enable pin for MAX485
 bool RS485::setEnable(uint8_t enablePin) {
     if (_rs485_en >= 0) {
@@ -423,27 +372,6 @@ bool RS485::setEnable(uint8_t enablePin) {
         return true;
     }
     return false;
-}
-
-// Debug print
-void RS485::debugPrint(const char* message) {
-    if (_debug) {
-        Serial.print("[RS485] ");
-        Serial.println(message);
-    }
-}
-
-// Debug print hexadecimal
-void RS485::debugPrintHex(uint8_t* data, uint8_t length) {
-    if (_debug) {
-        Serial.print("[RS485] ");
-        for (uint8_t i = 0; i < length; i++) {
-            if (data[i] < 16) Serial.print("0");
-            Serial.print(data[i], HEX);
-            Serial.print(" ");
-        }
-        Serial.println();
-    }
 }
 
 // Enable transmit mode (DE/RE = HIGH)
@@ -463,4 +391,9 @@ void RS485::enableReceive() {
 // Combine two 16-bit registers into a 32-bit value
 uint32_t RS485::combineRegisters(uint16_t low, uint16_t high) {
     return ((uint32_t)high << 16) | low;
+}
+
+// Get serial reference
+Stream* RS485::getSerial() {
+    return _serial;
 }

@@ -1,8 +1,29 @@
 #include "PZEM004T.h"
 
 // Constructor
-PZEM004T::PZEM004T(Stream &serial, uint8_t slaveAddr) 
+#if defined(__AVR_ATmega328P__)
+PZEM004T::PZEM004T(SoftwareSerial &serial, uint8_t slaveAddr) 
     : RS485(&serial), _slaveAddr(slaveAddr), _sampleTimeMs(SAMPLE_TIME), _lastReadTime(0) {
+}
+#else
+PZEM004T::PZEM004T(HardwareSerial &serial, uint8_t slaveAddr) 
+    : RS485(&serial), _slaveAddr(slaveAddr), _sampleTimeMs(SAMPLE_TIME), _lastReadTime(0), _rxPin(-1), _txPin(-1) {
+}
+PZEM004T::PZEM004T(HardwareSerial &serial, uint8_t rxPin, uint8_t txPin, uint8_t slaveAddr) 
+    : RS485(&serial), _slaveAddr(slaveAddr), _sampleTimeMs(SAMPLE_TIME), _lastReadTime(0), _rxPin(rxPin), _txPin(txPin) {
+}
+#endif
+
+void PZEM004T::begin(uint32_t baudrate){
+    #if defined(__AVR_ATmega328P__)
+        ((SoftwareSerial*)getSerial())->begin(baudrate);
+    #else
+        if (_rxPin != -1 && _txPin != -1){
+            ((HardwareSerial*)getSerial())->begin(baudrate, SERIAL_8N1, _rxPin, _txPin);
+        } else {
+            ((HardwareSerial*)getSerial())->begin(baudrate);
+        }
+    #endif
 }
 
 // Read voltage
@@ -122,8 +143,8 @@ float PZEM004T::readPowerFactor() {
     }
 }
 
-// Read alarm status
-bool PZEM004T::readAlarmStatus() {
+// Read power alarm status
+bool PZEM004T::readPowerAlarm() {
     if (_sampleTimeMs <= 0) {
         // Sample time disabled, read directly
         uint16_t data[1];
@@ -207,7 +228,7 @@ bool PZEM004T::setAddress(uint8_t newAddress) {
     return success;
 }
 
-// Get alarm threshold
+// Get power alarm threshold
 float PZEM004T::getPowerAlarm() {
     uint16_t data[1];
     if (readHoldingRegisters(_slaveAddr, PZEM_ALARM_THRESHOLD_REG, 1, data)) {

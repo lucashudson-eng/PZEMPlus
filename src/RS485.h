@@ -2,6 +2,9 @@
 #define RS485_H
 
 #include <Arduino.h>
+#if defined(__AVR_ATmega328P__)
+#include <SoftwareSerial.h>
+#endif
 
 // Modbus-RTU function codes
 #define MODBUS_READ_HOLDING_REGISTERS   0x03
@@ -40,18 +43,15 @@ public:
     uint32_t combineRegisters(uint16_t low, uint16_t high);
     
     // Configuration methods
-    void setDebug(bool enable);
     bool setEnable(uint8_t enablePin);
+    Stream* getSerial();
 
 private:
     Stream* _serial;
     uint32_t _responseTimeout;
-    bool _debug;
     uint8_t _rs485_en;
     
     // Internal methods
-    void debugPrint(const char* message);
-    void debugPrintHex(uint8_t* data, uint8_t length);
     void enableTransmit();
     void enableReceive();
 };

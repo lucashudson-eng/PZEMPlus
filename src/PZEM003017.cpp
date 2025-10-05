@@ -1,8 +1,29 @@
 #include "PZEM003017.h"
 
 // Constructor
-PZEM003017::PZEM003017(Stream &serial, uint8_t slaveAddr) 
+#if defined(__AVR_ATmega328P__)
+PZEM003017::PZEM003017(SoftwareSerial &serial, uint8_t slaveAddr) 
     : RS485(&serial), _slaveAddr(slaveAddr), _sampleTimeMs(SAMPLE_TIME), _lastReadTime(0) {
+}
+#else
+PZEM003017::PZEM003017(HardwareSerial &serial, uint8_t slaveAddr) 
+    : RS485(&serial), _slaveAddr(slaveAddr), _sampleTimeMs(SAMPLE_TIME), _lastReadTime(0), _rxPin(-1), _txPin(-1) {
+}
+PZEM003017::PZEM003017(HardwareSerial &serial, uint8_t rxPin, uint8_t txPin, uint8_t slaveAddr) 
+    : RS485(&serial), _slaveAddr(slaveAddr), _sampleTimeMs(SAMPLE_TIME), _lastReadTime(0), _rxPin(rxPin), _txPin(txPin) {
+}
+#endif
+
+void PZEM003017::begin(uint32_t baudrate){
+    #if defined(__AVR_ATmega328P__)
+        ((SoftwareSerial*)getSerial())->begin(baudrate);
+    #else
+        if (_rxPin != -1 && _txPin != -1){
+            ((HardwareSerial*)getSerial())->begin(baudrate, SERIAL_8N1, _rxPin, _txPin);
+        } else {
+            ((HardwareSerial*)getSerial())->begin(baudrate);
+        }
+    #endif
 }
 
 // Read voltage
@@ -187,31 +208,27 @@ bool PZEM003017::setAddress(uint8_t newAddress) {
 
 // Set current range (PZEM-017 only)
 bool PZEM003017::setCurrentRange(uint16_t range) {
-    #if defined(PZEM_017)
-        uint16_t rangeValue;
-        
-        // Convert range value to internal constant
-        switch (range) {
-            case 100:
-                rangeValue = PZEM_CURRENT_RANGE_100A;
-                break;
-            case 50:
-                rangeValue = PZEM_CURRENT_RANGE_50A;
-                break;
-            case 200:
-                rangeValue = PZEM_CURRENT_RANGE_200A;
-                break;
-            case 300:
-                rangeValue = PZEM_CURRENT_RANGE_300A;
-                break;
-            default:
-                return false; // Invalid range value
-        }
-        
-        return writeSingleRegister(_slaveAddr, PZEM_CURRENT_RANGE_REG, rangeValue);
-    #else
-        return false; // Not supported on PZEM-003
-    #endif
+    uint16_t rangeValue;
+    
+    // Convert range value to internal constant
+    switch (range) {
+        case 100:
+            rangeValue = PZEM_CURRENT_RANGE_100A;
+            break;
+        case 50:
+            rangeValue = PZEM_CURRENT_RANGE_50A;
+            break;
+        case 200:
+            rangeValue = PZEM_CURRENT_RANGE_200A;
+            break;
+        case 300:
+            rangeValue = PZEM_CURRENT_RANGE_300A;
+            break;
+        default:
+            return false; // Invalid range value
+    }
+    
+    return writeSingleRegister(_slaveAddr, PZEM_CURRENT_RANGE_REG, rangeValue);
 }
 
 // Get high voltage alarm
@@ -243,27 +260,23 @@ uint8_t PZEM003017::getAddress() {
 
 // Get current range (PZEM-017 only)
 uint16_t PZEM003017::getCurrentRange() {
-    #if defined(PZEM_017)
-        uint16_t data[1];
-        if (readHoldingRegisters(_slaveAddr, PZEM_CURRENT_RANGE_REG, 1, data)) {
-            // Convert internal constant to range value
-            switch (data[0]) {
-                case PZEM_CURRENT_RANGE_100A:
-                    return 100;
-                case PZEM_CURRENT_RANGE_50A:
-                    return 50;
-                case PZEM_CURRENT_RANGE_200A:
-                    return 200;
-                case PZEM_CURRENT_RANGE_300A:
-                    return 300;
-                default:
-                    return 0; // Unknown range value
-            }
+    uint16_t data[1];
+    if (readHoldingRegisters(_slaveAddr, PZEM_CURRENT_RANGE_REG, 1, data)) {
+        // Convert internal constant to range value
+        switch (data[0]) {
+            case PZEM_CURRENT_RANGE_100A:
+                return 100;
+            case PZEM_CURRENT_RANGE_50A:
+                return 50;
+            case PZEM_CURRENT_RANGE_200A:
+                return 200;
+            case PZEM_CURRENT_RANGE_300A:
+                return 300;
+            default:
+                return 0; // Unknown range value
         }
-        return 0; // Error value
-    #else
-        return 0; // Not supported on PZEM-003
-    #endif
+    }
+    return 0; // Error value
 }
 
 // Reset energy

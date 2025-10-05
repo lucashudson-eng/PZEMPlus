@@ -39,7 +39,14 @@
 class PZEM003017 : public RS485 {
 public:
     // Constructor
-    PZEM003017(Stream &serial, uint8_t slaveAddr = 0xF8);
+    #if defined(__AVR_ATmega328P__) 
+    PZEM003017(SoftwareSerial &serial, uint8_t slaveAddr = 0xF8);
+    #else
+    PZEM003017(HardwareSerial &serial, uint8_t slaveAddr = 0xF8);
+    PZEM003017(HardwareSerial &serial, uint8_t rxPin, uint8_t txPin, uint8_t slaveAddr = 0xF8);
+    #endif
+
+    void begin(uint32_t baudrate = 9600);
     
     // Measurement methods
     float readVoltage();
@@ -70,7 +77,11 @@ public:
 
 private:
     uint8_t _slaveAddr;
-    
+#if !defined(__AVR_ATmega328P__)
+    uint8_t _rxPin;
+    uint8_t _txPin;
+#endif
+
     // Sample time control
     unsigned long _sampleTimeMs;
     unsigned long _lastReadTime;
