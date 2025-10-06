@@ -33,7 +33,7 @@ public:
 #else
     PZEM004T(HardwareSerial &serial, uint8_t slaveAddr = 0xF8);
     PZEM004T(HardwareSerial &serial, uint8_t rxPin, uint8_t txPin, uint8_t slaveAddr = 0xF8);
-    #endif
+#endif
 
     void begin(uint32_t baudrate = 9600);
     

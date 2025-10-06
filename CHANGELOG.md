@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.1] - 2025-01-27
+
+### Added
+- **Multi-Device Example**: Complete example demonstrating how to use multiple PZEM devices simultaneously
+- **Array Management**: Example showing how to create and manage arrays of PZEMPlus objects
+- **Batch Reading**: Demonstration of efficient readAll() method across multiple devices
+- **Table Format Output**: Professional table formatting for multi-device measurements display
+
+### Improved
+- **Documentation**: Enhanced examples section with practical multi-device usage scenarios
+- **Code Examples**: Added comprehensive multi-device example with proper error handling
+
 ## [0.6.0] - 2025-01-27
 
 ### Added

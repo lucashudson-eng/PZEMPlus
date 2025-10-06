@@ -1,6 +1,6 @@
 # PZEMPlus
 
-![Version](https://img.shields.io/badge/version-0.6.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.6.1-blue.svg)
 ![License](https://img.shields.io/badge/license-GPL--3.0-green.svg)
 ![Platform](https://img.shields.io/badge/platform-Arduino%20%7C%20ESP32-orange.svg)
 
@@ -22,11 +22,11 @@ Install via Arduino or PlatformIO Library Manager, or download from GitHub relea
 
 ## Usage
 
-### Basic Setup
+### Basic Setup (Single Device)
 
 #### For AC Energy Monitors (PZEM-004T)
 ```cpp
-#define PZEM_004T  // Define your PZEM model
+#define PZEM_004T
 
 #include <PZEMPlus.h>
 
@@ -48,7 +48,7 @@ PZEMPlus pzem(Serial2);
 
 #### For 3-Phase AC Energy Monitors (PZEM-6L24) ⚠️ **Experimental**
 ```cpp
-#define PZEM_6L24  // Define your PZEM model
+#define PZEM_6L24
 
 #include <PZEMPlus.h>
 
@@ -57,6 +57,47 @@ PZEMPlus pzem(Serial2);
 // ⚠️ WARNING: This implementation is experimental and not yet tested!
 // Only read functions are implemented. Get/Set functions pending manual documentation.
 ```
+
+### Multi Device Setup
+
+#### Managing Multiple PZEM Devices
+```cpp
+#define PZEM_004T  // Define your PZEM model
+
+#include <PZEMPlus.h>
+
+// Number of PZEM devices to use
+#define NUM_DEVICES 3
+
+// Create array of PZEMPlus objects
+PZEMPlus* pzemDevices[NUM_DEVICES];
+
+void setup() {
+  // Initialize each device with different addresses
+  for (int i = 0; i < NUM_DEVICES; i++) {
+    uint8_t address = i+1;
+    pzemDevices[i] = new PZEMPlus(Serial2, address);
+    pzemDevices[i]->begin();
+  }
+}
+
+void loop() {
+  // Read all measurements from all devices
+  for (int i = 0; i < NUM_DEVICES; i++) {
+    float voltage, current, power, energy, frequency, powerFactor;
+    
+    if (pzemDevices[i]->readAll(&voltage, &current, &power, &energy, &frequency, &powerFactor)) {
+      Serial.print("Device ");
+      Serial.print(i);
+      Serial.print(": ");
+      Serial.print(voltage, 1);
+      Serial.println("V");
+    }
+  }
+  delay(2000);
+}
+```
+
 
 ### Reading Measurements
 
@@ -243,6 +284,16 @@ pzem.setSampleTime(1000); // Read from device every 1000ms, use cache otherwise
 // For PZEM-003/017 with MAX485 module
 // pzem.setEnable(4); // Set enable pin for RS485 transceiver
 ```
+
+## Examples
+
+The library includes comprehensive examples for all supported devices:
+
+- **PZEM-004T**: `examples/pzem_004t/pzem_004t.ino` - Single-phase energy monitoring
+- **Multi-Device**: `examples/multiDevice/multiDevice.ino` - Multiple devices management
+- **Address Change**: `examples/changeAddress/changeAddress.ino` - Device address configuration
+- **PZEM-003/017**: `examples/pzem_003_017/pzem_003_017.ino` - DC energy monitoring
+- **PZEM-6L24**: `examples/pzem_6l24/pzem_6l24.ino` - Three-phase energy monitoring
 
 ## Supported Models
 
