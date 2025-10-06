@@ -347,6 +347,85 @@ bool RS485::resetEnergy(uint8_t slaveAddr) {
     return true;
 }
 
+// Method to reset energy with phase sequence (for PZEM-6L24)
+bool RS485::resetEnergy(uint8_t slaveAddr, uint8_t phaseSequence) {
+    uint8_t request[6];
+    request[0] = slaveAddr;
+    request[1] = MODBUS_RESET_ENERGY;
+    request[2] = 0x00;  // Reserved byte
+    request[3] = phaseSequence;  // Phase sequence byte
+    
+    uint16_t crc = calculateCRC16(request, 4);
+    request[4] = crc & 0xFF;               // CRC Low byte
+    request[5] = (crc >> 8) & 0xFF;        // CRC High byte
+    
+    
+    // Clear any remaining data in buffer before sending
+    clearBuffer();
+    
+    // Enable transmit mode for sending
+    enableTransmit();
+    
+    // Send request
+    _serial->write(request, 6);
+    _serial->flush();
+    delay(10);
+    
+    // Switch to receive mode
+    enableReceive();
+    
+    // Receive optimized response
+    uint8_t response[6];
+    uint8_t responseLength = 0;
+    uint32_t startTime = millis();
+    uint32_t lastByteTime = 0;
+    
+    // For resetEnergy with phase: 1 (address) + 1 (function) + 1 (reserved) + 1 (phase) + 2 (CRC) = 6 bytes minimum
+    uint8_t minBytesExpected = 6;
+
+    bool foundSlaveAddr = false;
+    
+    // 300ms timeout to wait for response, avoid setting _responseTimeout to low
+    while (millis() - startTime < 300) {
+        if (_serial->available()) {
+            uint8_t byte = _serial->read();
+            
+            if (!foundSlaveAddr && byte == slaveAddr)
+                foundSlaveAddr = true;
+            
+            if (foundSlaveAddr) {
+                if (responseLength < sizeof(response)) {
+                    response[responseLength] = byte;
+                    responseLength++;
+                    lastByteTime = millis();
+                }
+            }
+        }
+        
+        // If received all expected bytes and passed time without new bytes
+        if (responseLength >= minBytesExpected && (millis() - lastByteTime) > 10) {
+            break;
+        }
+    }
+    
+    
+    if (responseLength == 0) {
+        return false;
+    }
+    
+    // Check if it is an error response (0xC2 indicates error)
+    if (response[1] == 0xC2) {
+        return false;
+    }
+    
+    // Verify CRC
+    if (!verifyCRC16(response, responseLength)) {
+        return false;
+    }
+    
+    return true;
+}
+
 // Modbus CRC16 calculation
 uint16_t RS485::calculateCRC16(uint8_t* data, uint8_t length) {
     uint16_t crc = 0xFFFF;

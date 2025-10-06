@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2025-01-27
+
+### Added
+- **PZEM-6L24 Implementation**: Complete implementation for three-phase energy monitoring device
+- **Three-Phase Measurements**: Support for individual phase readings (A, B, C) and combined measurements
+- **Advanced Measurements**: Voltage, current, frequency, power (active, reactive, apparent), energy, and power factor
+- **Phase Angle Monitoring**: Voltage and current phase angle measurements for power quality analysis
+- **Multi-Phase Reading Methods**: Efficient batch reading methods for all three phases simultaneously
+- **Combined Measurements**: Total power and energy calculations across all phases
+- **Energy Reset Functionality**: Support for resetting energy counters by phase or all phases
+- **Comprehensive Example**: Complete example demonstrating all PZEM-6L24 capabilities
+- **Modular Design**: Seamless integration with existing library architecture
+
+### Changed
+- **Library Structure**: Enhanced to support three-phase monitoring devices alongside existing single-phase devices
+- **Documentation**: Updated with PZEM-6L24 usage examples and configuration information
+
+### Fixed
+- **Device Compatibility**: Improved support for advanced three-phase energy monitoring applications
+- **Communication Layer**: Optimized for three-phase device protocols and register mapping
+
 ## [0.5.3] - 2025-01-27
 
 ### Improved

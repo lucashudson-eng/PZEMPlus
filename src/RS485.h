@@ -10,6 +10,7 @@
 #define MODBUS_READ_HOLDING_REGISTERS   0x03
 #define MODBUS_READ_INPUT_REGISTERS     0x04
 #define MODBUS_WRITE_SINGLE_REGISTER    0x06
+#define MODBUS_WRITE_MULTIPLE_REGISTERS 0x10
 #define MODBUS_RESET_ENERGY             0x42
 
 class RS485 {
@@ -22,6 +23,7 @@ public:
     bool readInputRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t numRegs, uint16_t* data);
     bool writeSingleRegister(uint8_t slaveAddr, uint16_t regAddr, uint16_t value);
     bool resetEnergy(uint8_t slaveAddr);
+    bool resetEnergy(uint8_t slaveAddr, uint8_t phaseSequence);
     
     // Utility methods
     uint16_t calculateCRC16(uint8_t* data, uint8_t length);

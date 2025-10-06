@@ -10,8 +10,8 @@ typedef PZEM004T PZEMPlus;
 typedef PZEM003017 PZEMPlus;
 
 #elif defined(PZEM_6L24)
-#include "PZEM006L24.h"
-typedef PZEM006L24 PZEMPlus;
+#include "PZEM6L24.h"
+typedef PZEM6L24 PZEMPlus;
 
 #elif defined(PZEM_IOT_E02)
 #include "PZEMIOTE02.h"
