@@ -39,7 +39,7 @@ bool RS485::readHoldingRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t
     uint8_t response[256];
     uint8_t responseLength = 0;
     uint32_t startTime = millis();
-    uint32_t lastByteTime = 0;
+    uint32_t lastByteTime = startTime;
     
     // Calculate minimum expected bytes: 3 (header) + 2*numRegs (data) + 2 (CRC)
     uint8_t minBytesExpected = 3 + (2 * numRegs) + 2;
@@ -97,95 +97,106 @@ bool RS485::readHoldingRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t
     return true;
 }
 
-// Method to read input registers (function 0x04)
-bool RS485::readInputRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t numRegs, uint16_t* data) {
-    
+// Method to read input registers (function 0x04) — legacy overload
+bool RS485::readInputRegisters(uint8_t slaveAddr,uint16_t startAddr,uint16_t numRegs,uint16_t* data) {
+    return readInputRegisters(slaveAddr, startAddr, numRegs, data, kDefaultOrder);
+}
+
+// New overload with the extra parameter
+bool RS485::readInputRegisters(uint8_t slaveAddr,uint16_t startAddr,uint16_t numRegs,uint16_t* data,RegByteOrder order)
+{
     uint8_t request[8];
     request[0] = slaveAddr;
     request[1] = MODBUS_READ_INPUT_REGISTERS;
-    request[2] = (startAddr >> 8) & 0xFF;  // High byte
-    request[3] = startAddr & 0xFF;         // Low byte
-    request[4] = (numRegs >> 8) & 0xFF;    // High byte
-    request[5] = numRegs & 0xFF;           // Low byte
-    
+    request[2] = (startAddr >> 8) & 0xFF;
+    request[3] = startAddr & 0xFF;
+    request[4] = (numRegs >> 8) & 0xFF;
+    request[5] = numRegs & 0xFF;
+
     uint16_t crc = calculateCRC16(request, 6);
-    request[6] = crc & 0xFF;               // CRC Low byte
-    request[7] = (crc >> 8) & 0xFF;        // CRC High byte
-    
-    
-    // Clear any remaining data in buffer before sending
+    request[6] = crc & 0xFF;
+    request[7] = (crc >> 8) & 0xFF;
+
     clearBuffer();
-    
-    // Enable transmit mode for sending
     enableTransmit();
+
+    // Debug: Print request bytes
     
-    // Send request
+    /*
+    for (int i = 0; i < 8; i++) {
+        Serial.print("Request byte ");
+        Serial.print(i);
+        Serial.print(": ");
+        Serial.println(request[i], HEX);
+    } 
+    */ 
+    
+
     _serial->write(request, 8);
     _serial->flush();
     delay(10);
-    
-    // Switch to receive mode
     enableReceive();
-    
-    // Receive optimized response - exit when all bytes received
+
     uint8_t response[256];
     uint8_t responseLength = 0;
     uint32_t startTime = millis();
-    uint32_t lastByteTime = 0;
-    
-    // Calculate minimum expected bytes: 3 (header) + 2*numRegs (data) + 2 (CRC)
-    uint8_t minBytesExpected = 3 + (2 * numRegs) + 2;
+    uint32_t lastByteTime = startTime;
 
+    uint8_t minBytesExpected = 3 + (2 * numRegs) + 2;
     bool foundSlaveAddr = false;
-    
+
     while (millis() - startTime < _responseTimeout) {
         if (_serial->available()) {
             uint8_t byte = _serial->read();
-            
+
             if (!foundSlaveAddr && byte == slaveAddr)
                 foundSlaveAddr = true;
-            
+
             if (foundSlaveAddr) {
                 if (responseLength < sizeof(response)) {
-                    response[responseLength] = byte;
-                    responseLength++;
+                    response[responseLength++] = byte;
                     lastByteTime = millis();
                 }
             }
         }
-        
-        // If received all expected bytes and passed time without new bytes
         if (responseLength >= minBytesExpected && (millis() - lastByteTime) > 10) {
             break;
         }
     }
-    
-    
-    if (responseLength == 0) {
-        return false;
+
+    /*
+    for (int i = 0; i < responseLength; i++) {
+        Serial.print("Response byte ");
+        Serial.print(i);
+        Serial.print(": ");
+        Serial.println(response[i], HEX);
     }
+    */
     
-    // Check if it is an error response
-    if (response[1] & 0x80) {
-        return false;
-    }
-    
-    // Verify CRC
-    if (!verifyCRC16(response, responseLength)) {
-        return false;
-    }
-    
-    // Extract data
+
+    if (responseLength == 0) return false;
+    if (response[1] & 0x80)  return false;
+    if (!verifyCRC16(response, responseLength)) return false;
+
     uint8_t byteCount = response[2];
     uint8_t dataIndex = 0;
+
+
     
+
     for (uint8_t i = 3; i < 3 + byteCount; i += 2) {
         if (dataIndex < numRegs) {
-            data[dataIndex] = (response[i] << 8) | response[i + 1];
+            if (order == RegByteOrder::HighByteSecond) {
+                // High byte comes second (e.g., PZEM-6L24)
+                data[dataIndex] = (response[i + 1] << 8) | response[i];
+            } else {
+                // High byte first (typical Modbus)
+                data[dataIndex] = (response[i] << 8) | response[i + 1];
+            }
             dataIndex++;
         }
     }
-    
+
     return true;
 }
 
@@ -464,7 +475,7 @@ void RS485::setTimeouts(uint32_t responseTimeout) {
 
 // Set enable pin for MAX485
 bool RS485::setEnable(uint8_t enablePin) {
-    if (_rs485_en >= 0) {
+    if (_rs485_en < 0) {
         _rs485_en = enablePin;
         pinMode(_rs485_en, OUTPUT);
         enableReceive(); // Start in receive mode
@@ -496,12 +507,13 @@ void RS485::clearBuffer() {
     }
 }
 
-// Combine two 16-bit registers into a 32-bit value
-uint32_t RS485::combineRegisters(uint16_t low, uint16_t high) {
-    return ((uint32_t)high << 16) | low;
+// Combine two 16-bit registers into a 32-bit value (msw is most significant word, lsw is least significant word)
+uint32_t RS485::combineRegisters(uint16_t msw, uint16_t lsw) {
+    return ((uint32_t)msw << 16) | lsw;
 }
 
 // Get serial reference
+// Returns the underlying Stream pointer for direct serial access.
 Stream* RS485::getSerial() {
     return _serial;
 }

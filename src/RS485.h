@@ -17,10 +17,21 @@ class RS485 {
 public:
     // Constructor
     RS485(Stream* serial);
-    
+
+    enum class RegByteOrder { HighByteFirst, HighByteSecond };
+    static constexpr RegByteOrder kDefaultOrder =
+    #if defined(DEVICE_PZEM_6L24) || defined(PZEM_6L24)
+        RegByteOrder::HighByteSecond;
+    #else
+        RegByteOrder::HighByteFirst;
+    #endif
+        
+    bool readInputRegisters(uint8_t slaveAddr,uint16_t startAddr,uint16_t numRegs,uint16_t* data); // Legacy overload (no default args needed here)
+    bool readInputRegisters(uint8_t slaveAddr,uint16_t startAddr,uint16_t numRegs,uint16_t* data,RegByteOrder order);  // New overload which allow the specification of register byte order (this is different for PZEM-6L24)
+
     // Generic communication methods
     bool readHoldingRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t numRegs, uint16_t* data);
-    bool readInputRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t numRegs, uint16_t* data);
+    bool writeMultipleRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t numRegs, uint16_t* data);
     bool writeSingleRegister(uint8_t slaveAddr, uint16_t regAddr, uint16_t value);
     bool resetEnergy(uint8_t slaveAddr);
     bool resetEnergy(uint8_t slaveAddr, uint8_t phaseSequence);
@@ -39,7 +50,7 @@ public:
 private:
     Stream* _serial;
     uint32_t _responseTimeout;
-    uint8_t _rs485_en;
+    int8_t _rs485_en; 
     
     // Internal methods
     void enableTransmit();
