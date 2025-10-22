@@ -17,9 +17,198 @@
  * Each function lists the device register addresses and LSB resolution.
  */
 
-// =============================================================================
+
+// Map baud code <-> baud rate
+static bool baudFromCode(PZEM_BaudCode code, uint32_t &baud) {
+  switch (code) {
+    case PZEM_BaudCode::B2400:   baud = 2400; break;
+    case PZEM_BaudCode::B4800:   baud = 4800; break;
+    case PZEM_BaudCode::B9600:   baud = 9600; break;
+    case PZEM_BaudCode::B19200:  baud = 19200; break;
+    case PZEM_BaudCode::B38400:  baud = 38400; break;
+    case PZEM_BaudCode::B57600:  baud = 57600; break;
+    case PZEM_BaudCode::B115200: baud = 115200; break;
+    default: return false;
+  }
+  return true;
+}
+static bool codeFromBaud(uint32_t baud, PZEM_BaudCode &code) {
+  switch (baud) {
+    case 2400:   code = PZEM_BaudCode::B2400; break;
+    case 4800:   code = PZEM_BaudCode::B4800; break;
+    case 9600:   code = PZEM_BaudCode::B9600; break;
+    case 19200:  code = PZEM_BaudCode::B19200; break;
+    case 38400:  code = PZEM_BaudCode::B38400; break;
+    case 57600:  code = PZEM_BaudCode::B57600; break;
+    case 115200: code = PZEM_BaudCode::B115200; break;
+    default: return false;
+  }
+  return true;
+}
+
+
+ // =============================================================================
 // Constructors
 // =============================================================================
+
+
+bool PZEM6L24::getAddressTypeAndSlave(PZEM_AddressType &addrType, uint8_t &slaveAddr) {
+    uint16_t reg;
+    if (!readHoldingRegisters(_slaveAddr, PZEM_CFG_ADDR_TYPE_SLAVE_REG, 1, &reg))
+        return false;
+
+    slaveAddr = (uint8_t)(reg & 0x00FF);                   // low byte = slave address
+    addrType  = static_cast<PZEM_AddressType>((reg >> 8) & 0x00FF);  // high byte = address type
+    return true;
+}
+
+// bool readHoldingRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t numRegs, uint16_t* data);
+
+bool PZEM6L24::setAddressTypeAndSlave(PZEM_AddressType addrType, uint8_t slaveAddr) {
+    if (slaveAddr < 1 || slaveAddr > 247) 
+        return false;
+
+    // Pack the data: high byte = addrType, low byte = slaveAddr
+    uint16_t value = ((uint16_t)addrType << 8) | (uint8_t)slaveAddr;
+
+    // Prepare a single-register array for writeMultipleRegisters
+    uint16_t data[1];
+    data[0] = value;
+
+    // Use Modbus function 0x10 (Write Multiple Registers)
+    if (!writeMultipleRegisters(_slaveAddr, PZEM_CFG_ADDR_TYPE_SLAVE_REG, 1, data))
+        return false;
+
+    // If software address type, update our internal address
+    if (addrType == PZEM_AddressType::Software)
+        _slaveAddr = slaveAddr;
+
+    return true;
+}
+
+bool PZEM6L24::getBaudAndModule(PZEM_BaudCode &baud, PZEM_ModuleType &moduleType) {
+    uint16_t reg;
+    if (!readHoldingRegisters(_slaveAddr, PZEM_CFG_BAUD_MODULE_REG, 1, &reg))
+        return false;
+
+    moduleType = static_cast<PZEM_ModuleType>(reg & 0x00FF);        // low byte = module type
+    baud       = static_cast<PZEM_BaudCode>((reg >> 8) & 0x00FF);   // high byte = baud code
+    return true;
+}
+
+bool PZEM6L24::setBaudAndModule(PZEM_BaudCode baud, PZEM_ModuleType moduleType) {
+    // Pack: high byte = baud, low byte = module type
+    uint16_t value = ((uint16_t)baud << 8) | (uint8_t)moduleType;
+
+    // Prepare a single 16-bit register for writing
+    uint16_t data[1];
+    data[0] = value;
+
+    // Use Modbus function 0x10 (Write Multiple Registers)
+    if (!writeMultipleRegisters(_slaveAddr, PZEM_CFG_BAUD_MODULE_REG, 1, data))
+        return false;
+
+    // Update UART baudrate to match the new configuration
+    uint32_t newBaud;
+    if (!baudFromCode(baud, newBaud))
+        return false;
+
+#if defined(__AVR_ATmega328P__)
+    ((SoftwareSerial*)getSerial())->end();
+    ((SoftwareSerial*)getSerial())->begin(newBaud);
+#else
+    if (_rxPin != -1 && _txPin != -1)
+        ((HardwareSerial*)getSerial())->begin(newBaud, SERIAL_8N1, _rxPin, _txPin);
+    else
+        ((HardwareSerial*)getSerial())->begin(newBaud);
+#endif
+
+    return true;
+}
+
+// ----------- 0x0002: Frequency System (High), Reserved (Low) -----------
+bool PZEM6L24::getFrequencySystem(PZEM_FreqSystem &freq) {
+    uint16_t reg;
+    if (!readHoldingRegisters(_slaveAddr, PZEM_CFG_FREQ_RESERVED_REG, 1, &reg))
+        return false;
+
+    freq = static_cast<PZEM_FreqSystem>((reg >> 8) & 0x00FF);  // high byte = frequency system
+    return true;
+}
+
+bool PZEM6L24::setFrequencySystem(PZEM_FreqSystem freq) {
+    // Pack high byte = frequency system, low byte = 0 (reserved)
+    uint16_t value = ((uint16_t)freq << 8);
+
+    // Prepare single 16-bit register for writing
+    uint16_t data[1];
+    data[0] = value;
+
+    // Use Modbus function 0x10 (Write Multiple Registers)
+    return writeMultipleRegisters(_slaveAddr, PZEM_CFG_FREQ_RESERVED_REG, 1, data);
+}
+
+bool PZEM6L24::getSlaveAddress(uint8_t &slave) {
+  PZEM_AddressType t; uint8_t s;
+  if (!getAddressTypeAndSlave(t, s)) return false;
+  slave = s;
+  return true;
+}
+bool PZEM6L24::setSlaveAddress(uint8_t slave, bool forceSoftware) {
+  // Preserve current address type unless forced to software.
+  PZEM_AddressType t; uint8_t curS;
+  if (!getAddressTypeAndSlave(t, curS)) return false;
+  if (forceSoftware) t = PZEM_AddressType::Software;
+  return setAddressTypeAndSlave(t, slave);
+}
+
+bool PZEM6L24::getAddressType(PZEM_AddressType &type) {
+  uint8_t s; return getAddressTypeAndSlave(type, s);
+}
+bool PZEM6L24::setAddressType(PZEM_AddressType type) {
+  // Keep existing slave address.
+  PZEM_AddressType curT; uint8_t s;
+  if (!getAddressTypeAndSlave(curT, s)) return false;
+  return setAddressTypeAndSlave(type, s);
+}
+
+bool PZEM6L24::getBaud(uint32_t &baud) {
+  PZEM_BaudCode code; PZEM_ModuleType mt;
+  if (!getBaudAndModule(code, mt)) return false;
+  return baudFromCode(code, baud);
+}
+bool PZEM6L24::setBaud(uint32_t baud) {
+  PZEM_BaudCode code;
+  if (!codeFromBaud(baud, code)) return false;
+  // Preserve current module type.
+  PZEM_BaudCode cur; PZEM_ModuleType mt;
+  if (!getBaudAndModule(cur, mt)) return false;
+  return setBaudAndModule(code, mt);
+}
+
+bool PZEM6L24::getModuleType(PZEM_ModuleType &type) {
+  PZEM_BaudCode b; return getBaudAndModule(b, type);
+}
+bool PZEM6L24::setModuleType(PZEM_ModuleType type) {
+  // Preserve current baud.
+  PZEM_BaudCode b; PZEM_ModuleType cur;
+  if (!getBaudAndModule(b, cur)) return false;
+  return setBaudAndModule(b, type);
+}
+
+bool PZEM6L24::getLineFrequency(uint16_t &hz) {
+  PZEM_FreqSystem fs;
+  if (!getFrequencySystem(fs)) return false;
+  hz = (fs == PZEM_FreqSystem::Hz60) ? 60 : 50;
+  return true;
+}
+bool PZEM6L24::setLineFrequency(uint16_t hz) {
+  PZEM_FreqSystem fs = (hz == 60) ? PZEM_FreqSystem::Hz60 : PZEM_FreqSystem::Hz50;
+  return setFrequencySystem(fs);
+}
+
+
+
 
 #if defined(__AVR_ATmega328P__)
 /**
@@ -620,6 +809,11 @@ void PZEM6L24::readCurrentPhaseAngle(float& angleA, float& angleB, float& angleC
         angleA = angleB = angleC = NAN;
     }
 }
+
+
+// =============================================================================
+// Reading and moddifying the slave parameters
+// =============================================================================
 
 /**
  * @brief Reset energy counters.

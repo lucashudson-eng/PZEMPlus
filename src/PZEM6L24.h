@@ -20,8 +20,19 @@
 
 #include "RS485.h"
 
+
+
+
 /* ============================================================================
-   PZEM-6L24 register addresses (base registers) — from datasheet table
+   PZEM-6L24 holding register addresses (base registers) — from datasheet table
+   ========================================================================== */
+#define PZEM_CFG_ADDR_TYPE_SLAVE_REG   0x0000  // lo: addr type, hi: slave address (1..247)
+#define PZEM_CFG_BAUD_MODULE_REG       0x0001  // lo: baud code, hi: module type
+#define PZEM_CFG_FREQ_RESERVED_REG     0x0002  // lo: freq system, hi: reserved
+
+
+/* ============================================================================
+   PZEM-6L24 input register addresses (base registers) — from datasheet table
    ========================================================================== */
 #define PZEM_VOLTAGE_REG                     0x0000  // A=0x0000, B=0x0001, C=0x0002
 #define PZEM_CURRENT_REG                     0x0003  // A=0x0003, B=0x0004, C=0x0005
@@ -54,6 +65,7 @@
 #define PZEM_ENERGY_RESOLUTION               0.1f   ///< 1 LSB = 0.1 kWh / kvarh / kVAh
 #define PZEM_PHASE_RESOLUTION                0.01f  ///< 1 LSB = 0.01 degree
 
+
 /* ============================================================================
    Reset energy options
    ========================================================================== */
@@ -62,6 +74,37 @@
 #define PZEM_RESET_ENERGY_C                  0x02
 #define PZEM_RESET_ENERGY_COMBINED           0x03
 #define PZEM_RESET_ENERGY_ALL                0x0F
+
+// Address type (low byte @ 0x0000)
+enum class PZEM_AddressType : uint8_t {
+  HardwareSwitch = 0, // default (DIP/hardware)
+  Software       = 1
+};
+
+// Baud code (low byte @ 0x0001)
+enum class PZEM_BaudCode : uint8_t {
+  B2400   = 0,
+  B4800   = 1,
+  B9600   = 2,  // default
+  B19200  = 3,
+  B38400  = 4,
+  B57600  = 5,
+  B115200 = 6
+};
+
+// Module type (high byte @ 0x0001)
+enum class PZEM_ModuleType : uint8_t {
+  ThreePhaseFourWire = 0, // default
+  ThreePhaseThreeWire = 1
+};
+
+// Frequency system (low byte @ 0x0002)
+enum class PZEM_FreqSystem : uint8_t {
+  Hz50 = 0, // default
+  Hz60 = 1
+};
+
+
 
 /**
  * @class PZEM6L24
@@ -210,6 +253,60 @@ public:
      * @return true on success, false on failure.
      */
     bool resetEnergy(uint8_t phaseOption = PZEM_RESET_ENERGY_ALL);
+
+      // ---------------- Low-level config access (raw register packing) ----------------
+  /**
+   * @brief Read 0x0000 (low: address type, high: slave address).
+   * @param addrType  OUT low byte (PZEM_AddressType) 0 = Hardware, 1 = Software
+   * @param slaveAddr OUT high byte (1..247)
+   * @return true on success
+   */
+  bool getAddressTypeAndSlave(PZEM_AddressType &addrType, uint8_t &slaveAddr);
+
+  /**
+   * @brief Write 0x0000 (low: address type, high: slave address).
+   *        If addrType==Software (1), device uses this software slave address.
+   *        Updates internal _slaveAddr on success.
+   */
+  bool setAddressTypeAndSlave(PZEM_AddressType addrType, uint8_t slaveAddr);
+
+  /**
+   * @brief Read 0x0001 (low: baud code, high: module type).
+   */
+  bool getBaudAndModule(PZEM_BaudCode &baud, PZEM_ModuleType &moduleType);
+
+  /**
+   * @brief Write 0x0001 (low: baud code, high: module type).
+   *        On success, reconfigures the host UART to the new baud.
+   */
+  bool setBaudAndModule(PZEM_BaudCode baud, PZEM_ModuleType moduleType);
+
+  /**
+   * @brief Read 0x0002 (low: frequency system, high: reserved).
+   */
+  bool getFrequencySystem(PZEM_FreqSystem &freq);
+
+  /**
+   * @brief Write 0x0002 (low: frequency system, high: 0).
+   */
+  bool setFrequencySystem(PZEM_FreqSystem freq);
+
+  // ---------------- Ergonomic helpers ----------------
+  bool getSlaveAddress(uint8_t &slave);     // (reads 0x0000)
+  bool setSlaveAddress(uint8_t slave, bool forceSoftware = true);
+
+  bool getAddressType(PZEM_AddressType &type); // (reads 0x0000)
+  bool setAddressType(PZEM_AddressType type);
+
+  bool getBaud(uint32_t &baud);             // (reads 0x0001)
+  bool setBaud(uint32_t baud);              // maps to PZEM_BaudCode, updates UART on success
+
+  bool getModuleType(PZEM_ModuleType &type); // (reads 0x0001)
+  bool setModuleType(PZEM_ModuleType type);  // preserves current baud code
+
+  bool getLineFrequency(uint16_t &hz);      // (reads 0x0002) -> 50 or 60
+  bool setLineFrequency(uint16_t hz);       // accepts 50 or 60
+
 
 private:
     uint8_t _slaveAddr;

@@ -5,7 +5,6 @@
  */
 
 #include <Arduino.h>
-#include <math.h>           // isnan, NAN
 #include "PZEM6L24.h"       // your NAN-based driver
 
 //======================================================================================

@@ -31,7 +31,7 @@ public:
 
     // Generic communication methods
     bool readHoldingRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t numRegs, uint16_t* data);
-    bool writeMultipleRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t numRegs, uint16_t* data);
+    bool writeMultipleRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t numRegs, const uint16_t* values);
     bool writeSingleRegister(uint8_t slaveAddr, uint16_t regAddr, uint16_t value);
     bool resetEnergy(uint8_t slaveAddr);
     bool resetEnergy(uint8_t slaveAddr, uint8_t phaseSequence);
