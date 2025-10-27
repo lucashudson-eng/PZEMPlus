@@ -60,7 +60,7 @@ void setup(){
     pzemDevices[i]->begin();
     
     // Configure timeouts
-    // pzemDevices[i].setTimeouts(100); // 100ms timeout to wait for response
+    // pzemDevices[i]->setTimeouts(100); // 100ms timeout to wait for response
     
     delay(100); // Small delay between initializations
   }

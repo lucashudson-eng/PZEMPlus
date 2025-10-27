@@ -19,9 +19,10 @@ public:
     RS485(Stream* serial);
     
     // Generic communication methods
-    bool readHoldingRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t numRegs, uint16_t* data);
-    bool readInputRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t numRegs, uint16_t* data);
-    bool writeSingleRegister(uint8_t slaveAddr, uint16_t regAddr, uint16_t value);
+    bool readHoldingRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t numRegs, uint16_t* data, bool big_endian = true);
+    bool readInputRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t numRegs, uint16_t* data, bool big_endian = true);
+    bool writeSingleRegister(uint8_t slaveAddr, uint16_t regAddr, uint16_t value, bool big_endian = true);
+    bool writeMultipleRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t numRegs, uint16_t* data, bool big_endian = true);
     bool resetEnergy(uint8_t slaveAddr);
     bool resetEnergy(uint8_t slaveAddr, uint8_t phaseSequence);
     
@@ -30,6 +31,7 @@ public:
     bool verifyCRC16(uint8_t* data, uint8_t length);
     void setTimeouts(uint32_t responseTimeout);
     uint32_t combineRegisters(uint16_t low, uint16_t high);
+    int32_t combineRegistersSigned(uint16_t low, uint16_t high);
     void clearBuffer();
     
     // Configuration methods

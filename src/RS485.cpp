@@ -6,7 +6,7 @@ RS485::RS485(Stream* serial)
 }
 
 // Method to read holding registers (function 0x03)
-bool RS485::readHoldingRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t numRegs, uint16_t* data) {
+bool RS485::readHoldingRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t numRegs, uint16_t* data, bool big_endian) {
     
     uint8_t request[8];
     request[0] = slaveAddr;
@@ -67,8 +67,7 @@ bool RS485::readHoldingRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t
             break;
         }
     }
-    
-    
+
     if (responseLength == 0) {
         return false;
     }
@@ -89,7 +88,13 @@ bool RS485::readHoldingRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t
     
     for (uint8_t i = 3; i < 3 + byteCount; i += 2) {
         if (dataIndex < numRegs) {
-            data[dataIndex] = (response[i] << 8) | response[i + 1];
+            if (big_endian) {
+                // Big endian: high byte first, low byte second
+                data[dataIndex] = (response[i] << 8) | response[i + 1];
+            } else {
+                // Little endian: low byte first, high byte second
+                data[dataIndex] = response[i] | (response[i + 1] << 8);
+            }
             dataIndex++;
         }
     }
@@ -98,7 +103,7 @@ bool RS485::readHoldingRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t
 }
 
 // Method to read input registers (function 0x04)
-bool RS485::readInputRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t numRegs, uint16_t* data) {
+bool RS485::readInputRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t numRegs, uint16_t* data, bool big_endian) {
     
     uint8_t request[8];
     request[0] = slaveAddr;
@@ -159,8 +164,7 @@ bool RS485::readInputRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t n
             break;
         }
     }
-    
-    
+
     if (responseLength == 0) {
         return false;
     }
@@ -181,7 +185,13 @@ bool RS485::readInputRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t n
     
     for (uint8_t i = 3; i < 3 + byteCount; i += 2) {
         if (dataIndex < numRegs) {
-            data[dataIndex] = (response[i] << 8) | response[i + 1];
+            if (big_endian) {
+                // Big endian: high byte first, low byte second
+                data[dataIndex] = (response[i] << 8) | response[i + 1];
+            } else {
+                // Little endian: low byte first, high byte second
+                data[dataIndex] = response[i] | (response[i + 1] << 8);
+            }
             dataIndex++;
         }
     }
@@ -190,14 +200,22 @@ bool RS485::readInputRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t n
 }
 
 // Method to write a single register (function 0x06)
-bool RS485::writeSingleRegister(uint8_t slaveAddr, uint16_t regAddr, uint16_t value) {
+bool RS485::writeSingleRegister(uint8_t slaveAddr, uint16_t regAddr, uint16_t value, bool big_endian) {
     uint8_t request[8];
     request[0] = slaveAddr;
     request[1] = MODBUS_WRITE_SINGLE_REGISTER;
     request[2] = (regAddr >> 8) & 0xFF;    // High byte
     request[3] = regAddr & 0xFF;           // Low byte
-    request[4] = (value >> 8) & 0xFF;      // High byte
-    request[5] = value & 0xFF;             // Low byte
+    
+    if (big_endian) {
+        // Big endian: high byte first, low byte second
+        request[4] = (value >> 8) & 0xFF;      // High byte
+        request[5] = value & 0xFF;             // Low byte
+    } else {
+        // Little endian: low byte first, high byte second
+        request[4] = value & 0xFF;             // Low byte
+        request[5] = (value >> 8) & 0xFF;      // High byte
+    }
     
     uint16_t crc = calculateCRC16(request, 6);
     request[6] = crc & 0xFF;               // CRC Low byte
@@ -252,7 +270,109 @@ bool RS485::writeSingleRegister(uint8_t slaveAddr, uint16_t regAddr, uint16_t va
         }
     }
     
+    if (responseLength == 0) {
+        return false;
+    }
     
+    // Check if it is an error response
+    if (response[1] & 0x80) {
+        return false;
+    }
+    
+    // Verify CRC
+    if (!verifyCRC16(response, responseLength)) {
+        return false;
+    }
+    
+    return true;
+}
+
+// Method to write multiple registers (function 0x10)
+bool RS485::writeMultipleRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t numRegs, uint16_t* data, bool big_endian) {
+    // Calculate total bytes needed: 6 (header) + 1 (byte count) + 2*numRegs (data) + 2 (CRC)
+    uint8_t totalBytes = 6 + 1 + (2 * numRegs) + 2;
+    uint8_t request[256]; // Buffer for request
+    
+    if (totalBytes > sizeof(request)) {
+        return false; // Request too large
+    }
+    
+    // Build request frame
+    request[0] = slaveAddr;
+    request[1] = MODBUS_WRITE_MULTIPLE_REGISTERS;
+    request[2] = (startAddr >> 8) & 0xFF;  // High byte
+    request[3] = startAddr & 0xFF;         // Low byte
+    request[4] = (numRegs >> 8) & 0xFF;    // High byte
+    request[5] = numRegs & 0xFF;           // Low byte
+    request[6] = 2 * numRegs;              // Byte count
+    
+    // Add data bytes
+    uint8_t dataIndex = 7;
+    for (uint16_t i = 0; i < numRegs; i++) {
+        if (big_endian) {
+            // Big endian: high byte first, low byte second
+            request[dataIndex++] = (data[i] >> 8) & 0xFF;  // High byte
+            request[dataIndex++] = data[i] & 0xFF;         // Low byte
+        } else {
+            // Little endian: low byte first, high byte second
+            request[dataIndex++] = data[i] & 0xFF;         // Low byte
+            request[dataIndex++] = (data[i] >> 8) & 0xFF;  // High byte
+        }
+    }
+    
+    // Calculate and add CRC
+    uint16_t crc = calculateCRC16(request, totalBytes - 2);
+    request[totalBytes - 2] = crc & 0xFF;               // CRC Low byte
+    request[totalBytes - 1] = (crc >> 8) & 0xFF;        // CRC High byte
+    
+    // Clear any remaining data in buffer before sending
+    clearBuffer();
+    
+    // Enable transmit mode for sending
+    enableTransmit();
+    
+    // Send request
+    _serial->write(request, totalBytes);
+    _serial->flush();
+    delay(10);
+    
+    // Switch to receive mode
+    enableReceive();
+    
+    // Receive optimized response
+    uint8_t response[8];
+    uint8_t responseLength = 0;
+    uint32_t startTime = millis();
+    uint32_t lastByteTime = 0;
+    
+    // For writeMultipleRegisters: 1 (address) + 1 (function) + 2 (register addr) + 2 (register quantity) + 2 (CRC) = 8 bytes minimum
+    uint8_t minBytesExpected = 8;
+
+    bool foundSlaveAddr = false;
+    
+    // 300ms timeout to wait for response, avoid setting _responseTimeout to low
+    while (millis() - startTime < 300) {
+        if (_serial->available()) {
+            uint8_t byte = _serial->read();
+            
+            if (!foundSlaveAddr && byte == slaveAddr)
+                foundSlaveAddr = true;
+            
+            if (foundSlaveAddr) {
+                if (responseLength < sizeof(response)) {
+                    response[responseLength] = byte;
+                    responseLength++;
+                    lastByteTime = millis();
+                }
+            }
+        }
+        
+        // If received all expected bytes and passed time without new bytes
+        if (responseLength >= minBytesExpected && (millis() - lastByteTime) > 10) {
+            break;
+        }
+    }
+
     if (responseLength == 0) {
         return false;
     }
@@ -499,6 +619,13 @@ void RS485::clearBuffer() {
 // Combine two 16-bit registers into a 32-bit value
 uint32_t RS485::combineRegisters(uint16_t low, uint16_t high) {
     return ((uint32_t)high << 16) | low;
+}
+
+// Combine two 16-bit registers into a signed 32-bit value
+int32_t RS485::combineRegistersSigned(uint16_t low, uint16_t high) {
+    uint32_t combined = ((uint32_t)high << 16) | low;
+    // Convert to signed 32-bit integer
+    return (int32_t)combined;
 }
 
 // Get serial reference

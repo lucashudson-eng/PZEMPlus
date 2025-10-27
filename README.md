@@ -1,6 +1,6 @@
 # PZEMPlus
 
-![Version](https://img.shields.io/badge/version-0.6.1-blue.svg)
+![Version](https://img.shields.io/badge/version-0.6.2-blue.svg)
 ![License](https://img.shields.io/badge/license-GPL--3.0-green.svg)
 ![Platform](https://img.shields.io/badge/platform-Arduino%20%7C%20ESP32-orange.svg)
 
@@ -24,9 +24,10 @@ Install via Arduino or PlatformIO Library Manager, or download from GitHub relea
 
 ### Basic Setup (Single Device)
 
-#### For AC Energy Monitors (PZEM-004T)
+#### For AC Energy Monitors (PZEM-004T/PZEM-6L24)
 ```cpp
 #define PZEM_004T
+// #define PZEM_6L24
 
 #include <PZEMPlus.h>
 
@@ -46,23 +47,11 @@ PZEMPlus pzem(Serial2);
 // pzem.setEnable(4); // Set enable pin for RS485 transceiver
 ```
 
-#### For 3-Phase AC Energy Monitors (PZEM-6L24) ⚠️ **Experimental**
-```cpp
-#define PZEM_6L24
-
-#include <PZEMPlus.h>
-
-PZEMPlus pzem(Serial2);
-
-// ⚠️ WARNING: This implementation is experimental and not yet tested!
-// Only read functions are implemented. Get/Set functions pending manual documentation.
-```
-
 ### Multi Device Setup
 
 #### Managing Multiple PZEM Devices
 ```cpp
-#define PZEM_004T  // Define your PZEM model
+#define PZEM_004T  // Exampling with PZEM-004T
 
 #include <PZEMPlus.h>
 
@@ -145,10 +134,8 @@ if (pzem.readAll(&voltage, &current, &power, &energy)) {
 }
 ```
 
-#### For 3-Phase AC Energy Monitors (PZEM-6L24) ⚠️ **Experimental**
+#### For 3-Phase AC Energy Monitors (PZEM-6L24)
 ```cpp
-// ⚠️ WARNING: Experimental implementation - not yet tested!
-
 // Read individual phase measurements (0=A, 1=B, 2=C)
 float voltageA = pzem.readVoltage(0);
 float currentA = pzem.readCurrent(0);
@@ -170,7 +157,7 @@ float totalEnergy = pzem.readActiveEnergy();
 float voltageAngleA, voltageAngleB, voltageAngleC;
 pzem.readVoltagePhaseAngle(voltageAngleA, voltageAngleB, voltageAngleC);
 
-// Reset energy (by phase or all)
+// Reset energy (by phase, combined or all)
 pzem.resetEnergy(PZEM_RESET_ENERGY_ALL);
 ```
 
@@ -190,6 +177,31 @@ pzem.resetEnergy();
 // Get current settings
 float threshold = pzem.getPowerAlarm(); // Returns 2300.0W
 uint8_t address = pzem.getAddress();
+```
+
+#### For 3-Phase AC Energy Monitors (PZEM-6L24)
+```cpp
+// Change device software address
+pzem.setAddress(0x01);
+
+// Use of hadrware address
+pzem.setAddress(0x00);
+
+// Set baudrate and connection type (same register)
+pzem.setBaudrateAndConnectionType(PZEM_BAUDRATE_9600, PZEM_CONNECTION_3PHASE_4WIRE);
+
+// Set frequency system
+pzem.setFrequency(PZEM_FREQUENCY_50HZ);
+
+// Reset energy counter (by phase, combined or all)
+pzem.resetEnergy(PZEM_RESET_ENERGY_ALL); // Reset all phases
+
+// Get current settings
+uint8_t address = pzem.getAddress(); // Returns 0x01
+bool software = pzem.getSoftwareHardwareSettings(); // Returns 0 (Hardware)
+uint8_t baudrate = pzem.getBaudrate(); // Returns 2 (9600)
+uint8_t connection = pzem.getConnectionType(); // Returns 0 (3 phases 4 wires)
+uint8_t frequency = pzem.getFrequency(); // Returns 0 (50Hz)
 ```
 
 #### For DC Energy Monitors (PZEM-003/017)
@@ -213,8 +225,8 @@ pzem.resetEnergy();
 // Get current settings
 float highThreshold = pzem.getHighVoltageAlarm(); // Returns 300.00V
 float lowThreshold = pzem.getLowVoltageAlarm();   // Returns 7.00V
-uint8_t address = pzem.getAddress();
-uint16_t currentRange = pzem.getCurrentRange(); // PZEM-017 only
+uint8_t address = pzem.getAddress(); // Returns 0x01
+uint16_t currentRange = pzem.getCurrentRange(); // Returns 300A (PZEM-017 only)
 ```
 
 ## Precision and Resolutions
@@ -254,7 +266,7 @@ uint16_t currentRange = pzem.getCurrentRange(); // PZEM-017 only
 - 200A range
 - 300A range
 
-### PZEM-6L24 (3-Phase AC Energy Monitor) ⚠️ **Experimental**
+### PZEM-6L24 (3-Phase AC Energy Monitor)
 
 | Parameter | Resolution | Accuracy | Min Value | Max Value | Unit |
 |-----------|------------|----------|-----------|-----------|------|
@@ -270,16 +282,10 @@ uint16_t currentRange = pzem.getCurrentRange(); // PZEM-017 only
 | Apparent Energy | 0.1kVAh | ±1% | 0kVAh | 399999999.9kVAh | kVAh |
 | Phase Angle | 0.01° | - | 0° | 360° | ° |
 
-⚠️ **Note**: PZEM-6L24 implementation is experimental and not yet tested. Only read functions are available.
-
 ### Troubleshooting
 ```cpp
 // Configure communication timeouts (default: 100ms)
 pzem.setTimeouts(100); // 100ms timeout
-
-// Configure sample time for optimized readings
-pzem.setSampleTime(1000); // Read from device every 1000ms, use cache otherwise
-// pzem.setSampleTime(0);  // Disable caching, read directly from device
 
 // For PZEM-003/017 with MAX485 module
 // pzem.setEnable(4); // Set enable pin for RS485 transceiver
@@ -290,7 +296,7 @@ pzem.setSampleTime(1000); // Read from device every 1000ms, use cache otherwise
 The library includes comprehensive examples for all supported devices:
 
 - **PZEM-004T**: `examples/pzem_004t/pzem_004t.ino` - Single-phase energy monitoring
-- **Multi-Device**: `examples/multiDevice/multiDevice.ino` - Multiple devices management
+- **Multi-Device**: `examples/multiDevice/multiDevice.ino` - Multiple devices management exampled with PZEM-004T
 - **Address Change**: `examples/changeAddress/changeAddress.ino` - Device address configuration
 - **PZEM-003/017**: `examples/pzem_003_017/pzem_003_017.ino` - DC energy monitoring
 - **PZEM-6L24**: `examples/pzem_6l24/pzem_6l24.ino` - Three-phase energy monitoring
@@ -319,16 +325,13 @@ The library includes comprehensive examples for all supported devices:
   - Energy counter reset functionality
   - Batch reading for efficiency
 
-### Experimental (Not Tested)
-- **PZEM-6L24**: 3-phase AC energy monitor (100A range, external shunt) ⚠️ **EXPERIMENTAL**
-  - ✅ Read functions implemented (voltage, current, power, energy, frequency, power factor, phase angles)
-  - ✅ Individual phase measurements (A, B, C)
-  - ✅ Multi-phase batch reading methods
-  - ✅ Combined measurements (total across all phases)
-  - ✅ Energy reset functionality
-  - ❌ **NOT TESTED** - Implementation based on manual documentation only
-  - ❌ **INCOMPLETE** - Get/Set configuration functions pending physical device testing
-  - ❌ **WARNING** - Use at your own risk until properly tested
+- **PZEM-6L24**: 3-phase AC energy monitor (100A range, external shunt)
+  - Read functions implemented (voltage, current, power, energy, frequency, power factor, phase angles)
+  - Individual phase measurements (A, B, C)
+  - Multi-phase batch reading methods
+  - Combined measurements (total across all phases)
+  - Energy reset functionality
+  - Device configuration functions
 
 ### In Development
 - **PZIOT-E02**: IoT Single-phase AC energy monitor (100A range, built-in shunt)
@@ -337,26 +340,6 @@ The library includes comprehensive examples for all supported devices:
 - ✅ **PZEM-004T**: Complete implementation with full feature set
 - ✅ **PZEM-003**: Complete implementation with full feature set  
 - ✅ **PZEM-017**: Complete implementation with full feature set
-- ⚠️ **PZEM-6L24**: Read functions implemented, **NOT TESTED**, configuration functions pending
+- ✅ **PZEM-6L24**: Complete implementation with full feature set
 - 🚧 **PZIOT-E02**: Class structure created, implementation pending
 
-## ⚠️ Important Notice for PZEM-6L24
-
-The PZEM-6L24 implementation is **EXPERIMENTAL** and has **NOT BEEN TESTED** with a physical device. 
-
-### What's Implemented:
-- ✅ All read functions (voltage, current, power, energy, frequency, power factor, phase angles)
-- ✅ Individual phase measurements (A, B, C phases)
-- ✅ Multi-phase batch reading methods for efficiency
-- ✅ Combined measurements (total power/energy across all phases)
-- ✅ Energy reset functionality
-- ✅ Complete example code
-
-### What's Missing:
-- ❌ **Physical device testing** - Implementation based on manual documentation only
-- ❌ **Get/Set configuration functions** - Pending physical device testing and manual verification
-- ❌ **Parameter validation** - Not verified with actual device behavior
-- ❌ **Error handling verification** - Not tested with real device responses
-
-### Usage Warning:
-**Use PZEM-6L24 implementation at your own risk!** The code may not work correctly until properly tested with a physical device. The implementation is provided as a starting point for development and testing.

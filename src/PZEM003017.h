@@ -54,8 +54,6 @@ public:
     // Method to read all measurements at once
     bool readAll(float* voltage, float* current, float* power, float* energy);
     
-    // Sample time control
-    void setSampleTime(unsigned long sampleTimeMs);
     
     // Parameter methods
     bool setHighVoltageAlarm(float threshold);
@@ -77,15 +75,6 @@ private:
     uint8_t _txPin;
 #endif
 
-    // Sample time control
-    unsigned long _sampleTimeMs;
-    unsigned long _lastReadTime;
-    
-    // Cached data
-    float _cachedVoltage;
-    float _cachedCurrent;
-    float _cachedPower;
-    float _cachedEnergy;
 };
 
 #endif // PZEM003017_H

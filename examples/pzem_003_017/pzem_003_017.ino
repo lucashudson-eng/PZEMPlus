@@ -1,15 +1,15 @@
 /*
- * PZEM-003/017 Example
- *
- * This example demonstrates how to use the PZEMPlus library with PZEM-003/017
- * energy monitoring device. It shows both individual measurement methods
- * and the efficient batch reading method.
- *
- * Author: Lucas Hudson
- * GitHub: https://github.com/lucashudson-eng/PZEMPlus
- *
- * License: GPL-3.0
- */
+* PZEM-003/017 Example
+*
+* This example demonstrates how to use the PZEMPlus library with PZEM-003/017
+* energy monitoring device. It shows both individual measurement methods
+* and the efficient batch reading method.
+*
+* Author: Lucas Hudson
+* GitHub: https://github.com/lucashudson-eng/PZEMPlus
+*
+* License: GPL-3.0
+*/
 
 // #define PZEM_003
 #define PZEM_017
@@ -43,7 +43,19 @@ void setup(){
   pzem.setEnable(PZEM_RS485_EN);
 #endif
 
-  // Set address to 0x01
+  // Configure timeouts
+  // pzem.setTimeouts(100); // 100ms timeout to wait for response
+
+  Serial.print("Address: ");
+  Serial.println(pzem.getAddress());
+  Serial.print("Current range (PZEM-017 only): ");
+  Serial.println(pzem.getCurrentRange());
+  Serial.print("High voltage alarm threshold: ");
+  Serial.println(pzem.getHighVoltageAlarm());
+  Serial.print("Low voltage alarm threshold: ");
+  Serial.println(pzem.getLowVoltageAlarm());
+
+  // Set address to 0x01 (0x01 to 0xF7)
   // pzem.setAddress(0x01);
 
   // Set current range to 50, 100, 200 or 300A (PZEM-017 only)
@@ -55,13 +67,6 @@ void setup(){
 
   // Reset energy counter
   // pzem.resetEnergy();
-
-  // Configure timeouts
-  // pzem.setTimeouts(100); // 100ms timeout to wait for response
-
-  // Configure sample time
-  // pzem.setSampleTime(1000); // 1 second sample time for caching
-  // pzem.setSampleTime(0);    // Default, disable sample time (always request fresh data)
 
   Serial.println("PZEM-003/017 started");
   Serial.println("Waiting for measurements...");
@@ -76,7 +81,7 @@ void loop(){
   float voltage = pzem.readVoltage();
   uint32_t voltageTime = millis() - startTime;
 
-  if (voltage >= 0){
+  if (!isnan(voltage)){
     Serial.print("Voltage: ");
     Serial.print(voltage, 2);
     Serial.print(" V (");
@@ -95,7 +100,7 @@ void loop(){
   float current = pzem.readCurrent();
   uint32_t currentTime = millis() - startTime;
 
-  if (current >= 0){
+  if (!isnan(current)){
     Serial.print("Current: ");
     Serial.print(current, 2);
     Serial.print(" A (");
@@ -114,7 +119,7 @@ void loop(){
   float power = pzem.readPower();
   uint32_t powerTime = millis() - startTime;
 
-  if (power >= 0){
+  if (!isnan(power)){
     Serial.print("Power: ");
     Serial.print(power, 1);
     Serial.print(" W (");
@@ -133,7 +138,7 @@ void loop(){
   float energy = pzem.readEnergy();
   uint32_t energyTime = millis() - startTime;
 
-  if (energy >= 0){
+  if (!isnan(energy)){
     Serial.print("Energy: ");
     Serial.print(energy, 0);
     Serial.print(" Wh (");
@@ -174,74 +179,6 @@ void loop(){
 
   delay(200);
 
-  // Test 7: getHighVoltageAlarm()
-  Serial.println("7. getHighVoltageAlarm()...");
-  startTime = millis();
-  float highVoltageThreshold = pzem.getHighVoltageAlarm();
-  uint32_t highVoltageThresholdTime = millis() - startTime;
-
-  if (highVoltageThreshold >= 0){
-    Serial.print("High Voltage Alarm Threshold: ");
-    Serial.print(highVoltageThreshold, 2);
-    Serial.print(" V (");
-    Serial.print(highVoltageThresholdTime);
-    Serial.println("ms)");
-  }
-  else{
-    Serial.println("Error reading high voltage alarm threshold");
-  }
-
-  delay(200);
-
-  // Test 8: getLowVoltageAlarm()
-  Serial.println("8. getLowVoltageAlarm()...");
-  startTime = millis();
-  float lowVoltageThreshold = pzem.getLowVoltageAlarm();
-  uint32_t lowVoltageThresholdTime = millis() - startTime;
-
-  if (lowVoltageThreshold >= 0){
-    Serial.print("Low Voltage Alarm Threshold: ");
-    Serial.print(lowVoltageThreshold, 2);
-    Serial.print(" V (");
-    Serial.print(lowVoltageThresholdTime);
-    Serial.println("ms)");
-  }
-  else{
-    Serial.println("Error reading low voltage alarm threshold");
-  }
-
-  delay(200);
-
-  // Test 9: getAddress()
-  Serial.println("9. getAddress()...");
-  startTime = millis();
-  uint8_t address = pzem.getAddress();
-  uint32_t addressTime = millis() - startTime;
-
-  Serial.print("PZEM Address: 0x");
-  if (address < 16)
-    Serial.print("0");
-  Serial.print(address, HEX);
-  Serial.print(" (");
-  Serial.print(addressTime);
-  Serial.println("ms)");
-
-  delay(200);
-
-  // Test 10: getCurrentRange()
-  Serial.println("10. getCurrentRange()...");
-  startTime = millis();
-  uint16_t currentRange = pzem.getCurrentRange();
-  uint32_t currentRangeTime = millis() - startTime;
-
-  Serial.print("Current Range: ");
-  Serial.print(currentRange);
-  Serial.print(" A (");
-  Serial.print(currentRangeTime);
-  Serial.println("ms)");
-
-  delay(200);
-
   // Test 11: readAll()
   Serial.println("11. readAll()...");
   startTime = millis();
@@ -275,7 +212,7 @@ void loop(){
     Serial.println("Error in readAll()");
   }
 
-  Serial.println("========================");
+  Serial.println("\n========================");
 
-  delay(1000);
+  delay(2000);
 }

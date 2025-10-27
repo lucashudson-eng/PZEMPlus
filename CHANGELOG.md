@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.2] - 2025-01-27
+
+### Added
+- **PZEM-6L24 Parameter Management**: Complete implementation of parameter reading and configuration functions
+- **Configuration Functions**: Added methods to read and set address, baudrate, connection type, and frequency settings
+- **Parameter Reading Methods**: `getAddress()`, `getBaudrate()`, `getConnectionType()`, `getFrequency()`, `getSoftwareHardwareSettings()`
+- **Parameter Setting Methods**: `setAddress()`, `setBaudrate()`, `setBaudrateAndConnectionType()`, `setFrequency()`
+
+### Changed
+- **Error Handling Standardization**: Changed all error return values from -1 to NAN across all PZEM models for consistency
+- **Code Standardization**: Improved code consistency and standardization across all device implementations
+- **PZEM-6L24 Measurements**: Enhanced and corrected measurement reading functions for better accuracy and reliability
+
+### Fixed
+- **PZEM-6L24 Reading Corrections**: Fixed various measurement reading issues and improved data processing accuracy
+- **Error Value Consistency**: Standardized error handling to use NAN instead of -1 for better floating-point compatibility
+- **Parameter Configuration**: Improved parameter setting and reading reliability for PZEM-6L24 device
+
+### Improved
+- **Library Consistency**: Enhanced overall code consistency and maintainability across all PZEM device classes
+- **Error Detection**: Better error detection and handling throughout the library
+- **Documentation**: Updated internal documentation and code comments for better clarity
+
 ## [0.6.1] - 2025-01-27
 
 ### Added
