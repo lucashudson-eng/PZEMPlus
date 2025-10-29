@@ -30,8 +30,7 @@ public:
     uint16_t calculateCRC16(uint8_t* data, uint8_t length);
     bool verifyCRC16(uint8_t* data, uint8_t length);
     void setTimeouts(uint32_t responseTimeout);
-    uint32_t combineRegisters(uint16_t low, uint16_t high);
-    int32_t combineRegistersSigned(uint16_t low, uint16_t high);
+    uint32_t combineRegisters(uint16_t low, uint16_t high, bool signed_result = false);
     void clearBuffer();
     
     // Configuration methods

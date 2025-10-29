@@ -367,7 +367,7 @@ bool RS485::writeMultipleRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16
             }
         }
         
-        // If received all expected bytes and passed time without new bytes
+        // If received all exected bytes and passed time without new bytes
         if (responseLength >= minBytesExpected && (millis() - lastByteTime) > 10) {
             break;
         }
@@ -616,16 +616,16 @@ void RS485::clearBuffer() {
     }
 }
 
-// Combine two 16-bit registers into a 32-bit value
-uint32_t RS485::combineRegisters(uint16_t low, uint16_t high) {
-    return ((uint32_t)high << 16) | low;
-}
-
-// Combine two 16-bit registers into a signed 32-bit value
-int32_t RS485::combineRegistersSigned(uint16_t low, uint16_t high) {
+// Combine two 16-bit registers into a 32-bit value (unsigned or signed)
+uint32_t RS485::combineRegisters(uint16_t low, uint16_t high, bool signed_result) {
     uint32_t combined = ((uint32_t)high << 16) | low;
-    // Convert to signed 32-bit integer
-    return (int32_t)combined;
+    
+    if (signed_result) {
+        // Convert to signed 32-bit integer
+        return (int32_t)combined;
+    }
+    
+    return combined;
 }
 
 // Get serial reference

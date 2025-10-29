@@ -64,7 +64,7 @@ float PZEM6L24::readActivePower(uint8_t phase) {
     
     uint16_t data[2];
     if (readInputRegisters(_slaveAddr, PZEM_ACTIVE_POWER_REG + (phase * 2), 2, data, false)) {
-        int32_t powerRaw = combineRegistersSigned(data[0], data[1]);
+        int32_t powerRaw = combineRegisters(data[0], data[1], true);
         return powerRaw * PZEM_POWER_RESOLUTION;
     }
     return NAN;
@@ -75,7 +75,7 @@ float PZEM6L24::readReactivePower(uint8_t phase) {
     
     uint16_t data[2];
     if (readInputRegisters(_slaveAddr, PZEM_REACTIVE_POWER_REG + (phase * 2), 2, data, false)) {
-        int32_t powerRaw = combineRegistersSigned(data[0], data[1]);
+        int32_t powerRaw = combineRegisters(data[0], data[1], true);
         return powerRaw * PZEM_POWER_RESOLUTION;
     }
     return NAN;
@@ -86,7 +86,7 @@ float PZEM6L24::readApparentPower(uint8_t phase) {
     
     uint16_t data[2];
     if (readInputRegisters(_slaveAddr, PZEM_APPARENT_POWER_REG + (phase * 2), 2, data, false)) {
-        int32_t powerRaw = combineRegistersSigned(data[0], data[1]);
+        int32_t powerRaw = combineRegisters(data[0], data[1], true);
         return powerRaw * PZEM_POWER_RESOLUTION;
     }
     return NAN;
@@ -125,7 +125,7 @@ float PZEM6L24::readActiveEnergy(uint8_t phase) {
     
     uint16_t data[2];
     if (readInputRegisters(_slaveAddr, PZEM_ACTIVE_ENERGY_REG + (phase * 2), 2, data, false)) {
-        uint32_t energyRaw = combineRegisters(data[0], data[1]);
+        uint32_t energyRaw = combineRegisters(data[0], data[1], true);
         return energyRaw * PZEM_ENERGY_RESOLUTION;
     }
     return NAN;
@@ -136,7 +136,7 @@ float PZEM6L24::readReactiveEnergy(uint8_t phase) {
     
     uint16_t data[2];
     if (readInputRegisters(_slaveAddr, PZEM_REACTIVE_ENERGY_REG + (phase * 2), 2, data, false)) {
-        uint32_t energyRaw = combineRegisters(data[0], data[1]);
+        uint32_t energyRaw = combineRegisters(data[0], data[1], true);
         return energyRaw * PZEM_ENERGY_RESOLUTION;
     }
     return NAN;
@@ -147,7 +147,7 @@ float PZEM6L24::readApparentEnergy(uint8_t phase) {
     
     uint16_t data[2];
     if (readInputRegisters(_slaveAddr, PZEM_APPARENT_ENERGY_REG + (phase * 2), 2, data, false)) {
-        uint32_t energyRaw = combineRegisters(data[0], data[1]);
+        uint32_t energyRaw = combineRegisters(data[0], data[1], true);
         return energyRaw * PZEM_ENERGY_RESOLUTION;
     }
     return NAN;
@@ -182,7 +182,7 @@ float PZEM6L24::readCurrentPhaseAngle(uint8_t phase) {
 float PZEM6L24::readActivePower() {
     uint16_t data[2];
     if (readInputRegisters(_slaveAddr, PZEM_ACTIVE_POWER_COMBINED_REG, 2, data, false)) {
-        int32_t powerRaw = combineRegistersSigned(data[0], data[1]);
+        int32_t powerRaw = combineRegisters(data[0], data[1], true);
         return powerRaw * PZEM_POWER_RESOLUTION;
     }
     return NAN;
@@ -191,7 +191,7 @@ float PZEM6L24::readActivePower() {
 float PZEM6L24::readReactivePower() {
     uint16_t data[2];
     if (readInputRegisters(_slaveAddr, PZEM_REACTIVE_POWER_COMBINED_REG, 2, data, false)) {
-        int32_t powerRaw = combineRegistersSigned(data[0], data[1]);
+        int32_t powerRaw = combineRegisters(data[0], data[1], true);
         return powerRaw * PZEM_POWER_RESOLUTION;
     }
     return NAN;
@@ -200,7 +200,7 @@ float PZEM6L24::readReactivePower() {
 float PZEM6L24::readApparentPower() {
     uint16_t data[2];
     if (readInputRegisters(_slaveAddr, PZEM_APPARENT_POWER_COMBINED_REG, 2, data, false)) {
-        int32_t powerRaw = combineRegistersSigned(data[0], data[1]);
+        int32_t powerRaw = combineRegisters(data[0], data[1], true);
         return powerRaw * PZEM_POWER_RESOLUTION;
     }
     return NAN;
@@ -219,7 +219,7 @@ float PZEM6L24::readPowerFactor() {
 float PZEM6L24::readActiveEnergy() {
     uint16_t data[2];
     if (readInputRegisters(_slaveAddr, PZEM_ACTIVE_ENERGY_COMBINED_REG, 2, data, false)) {
-        uint32_t energyRaw = combineRegisters(data[0], data[1]);
+        uint32_t energyRaw = combineRegisters(data[0], data[1], true);
         return energyRaw * PZEM_ENERGY_RESOLUTION;
     }
     return NAN;
@@ -228,7 +228,7 @@ float PZEM6L24::readActiveEnergy() {
 float PZEM6L24::readReactiveEnergy() {
     uint16_t data[2];
     if (readInputRegisters(_slaveAddr, PZEM_REACTIVE_ENERGY_COMBINED_REG, 2, data, false)) {
-        uint32_t energyRaw = combineRegisters(data[0], data[1]);
+        uint32_t energyRaw = combineRegisters(data[0], data[1], true);
         return energyRaw * PZEM_ENERGY_RESOLUTION;
     }
     return NAN;
@@ -237,7 +237,7 @@ float PZEM6L24::readReactiveEnergy() {
 float PZEM6L24::readApparentEnergy() {
     uint16_t data[2];
     if (readInputRegisters(_slaveAddr, PZEM_APPARENT_ENERGY_COMBINED_REG, 2, data, false)) {
-        uint32_t energyRaw = combineRegisters(data[0], data[1]);
+        uint32_t energyRaw = combineRegisters(data[0], data[1], true);
         return energyRaw * PZEM_ENERGY_RESOLUTION;
     }
     return NAN;
@@ -280,9 +280,9 @@ void PZEM6L24::readFrequency(float& frequencyA, float& frequencyB, float& freque
 void PZEM6L24::readActivePower(float& powerA, float& powerB, float& powerC) {
     uint16_t data[6];
     if (readInputRegisters(_slaveAddr, PZEM_ACTIVE_POWER_REG, 6, data, false)) {
-        int32_t powerARaw = combineRegistersSigned(data[0], data[1]);
-        int32_t powerBRaw = combineRegistersSigned(data[2], data[3]);
-        int32_t powerCRaw = combineRegistersSigned(data[4], data[5]);
+        int32_t powerARaw = combineRegisters(data[0], data[1], true);
+        int32_t powerBRaw = combineRegisters(data[2], data[3], true);
+        int32_t powerCRaw = combineRegisters(data[4], data[5], true);
         
         powerA = powerARaw * PZEM_POWER_RESOLUTION;
         powerB = powerBRaw * PZEM_POWER_RESOLUTION;
@@ -295,9 +295,9 @@ void PZEM6L24::readActivePower(float& powerA, float& powerB, float& powerC) {
 void PZEM6L24::readReactivePower(float& powerA, float& powerB, float& powerC) {
     uint16_t data[6];
     if (readInputRegisters(_slaveAddr, PZEM_REACTIVE_POWER_REG, 6, data, false)) {
-        int32_t powerARaw = combineRegistersSigned(data[0], data[1]);
-        int32_t powerBRaw = combineRegistersSigned(data[2], data[3]);
-        int32_t powerCRaw = combineRegistersSigned(data[4], data[5]);
+        int32_t powerARaw = combineRegisters(data[0], data[1], true);
+        int32_t powerBRaw = combineRegisters(data[2], data[3], true);
+        int32_t powerCRaw = combineRegisters(data[4], data[5], true);
         
         powerA = powerARaw * PZEM_POWER_RESOLUTION;
         powerB = powerBRaw * PZEM_POWER_RESOLUTION;
@@ -310,9 +310,9 @@ void PZEM6L24::readReactivePower(float& powerA, float& powerB, float& powerC) {
 void PZEM6L24::readApparentPower(float& powerA, float& powerB, float& powerC) {
     uint16_t data[6];
     if (readInputRegisters(_slaveAddr, PZEM_APPARENT_POWER_REG, 6, data, false)) {
-        int32_t powerARaw = combineRegistersSigned(data[0], data[1]);
-        int32_t powerBRaw = combineRegistersSigned(data[2], data[3]);
-        int32_t powerCRaw = combineRegistersSigned(data[4], data[5]);
+        int32_t powerARaw = combineRegisters(data[0], data[1], true);
+        int32_t powerBRaw = combineRegisters(data[2], data[3], true);
+        int32_t powerCRaw = combineRegisters(data[4], data[5], true);
         
         powerA = powerARaw * PZEM_POWER_RESOLUTION;
         powerB = powerBRaw * PZEM_POWER_RESOLUTION;
@@ -347,9 +347,9 @@ void PZEM6L24::readPowerFactor(float& factorA, float& factorB, float& factorC) {
 void PZEM6L24::readActiveEnergy(float& energyA, float& energyB, float& energyC) {
     uint16_t data[6];
     if (readInputRegisters(_slaveAddr, PZEM_ACTIVE_ENERGY_REG, 6, data, false)) {
-        uint32_t energyARaw = combineRegisters(data[0], data[1]);
-        uint32_t energyBRaw = combineRegisters(data[2], data[3]);
-        uint32_t energyCRaw = combineRegisters(data[4], data[5]);
+        uint32_t energyARaw = combineRegisters(data[0], data[1], true);
+        uint32_t energyBRaw = combineRegisters(data[2], data[3], true);
+        uint32_t energyCRaw = combineRegisters(data[4], data[5], true);
         
         energyA = energyARaw * PZEM_ENERGY_RESOLUTION;
         energyB = energyBRaw * PZEM_ENERGY_RESOLUTION;
@@ -362,9 +362,9 @@ void PZEM6L24::readActiveEnergy(float& energyA, float& energyB, float& energyC) 
 void PZEM6L24::readReactiveEnergy(float& energyA, float& energyB, float& energyC) {
     uint16_t data[6];
     if (readInputRegisters(_slaveAddr, PZEM_REACTIVE_ENERGY_REG, 6, data, false)) {
-        uint32_t energyARaw = combineRegisters(data[0], data[1]);
-        uint32_t energyBRaw = combineRegisters(data[2], data[3]);
-        uint32_t energyCRaw = combineRegisters(data[4], data[5]);
+        uint32_t energyARaw = combineRegisters(data[0], data[1], true);
+        uint32_t energyBRaw = combineRegisters(data[2], data[3], true);
+        uint32_t energyCRaw = combineRegisters(data[4], data[5], true);
         
         energyA = energyARaw * PZEM_ENERGY_RESOLUTION;
         energyB = energyBRaw * PZEM_ENERGY_RESOLUTION;
@@ -377,9 +377,9 @@ void PZEM6L24::readReactiveEnergy(float& energyA, float& energyB, float& energyC
 void PZEM6L24::readApparentEnergy(float& energyA, float& energyB, float& energyC) {
     uint16_t data[6];
     if (readInputRegisters(_slaveAddr, PZEM_APPARENT_ENERGY_REG, 6, data, false)) {
-        uint32_t energyARaw = combineRegisters(data[0], data[1]);
-        uint32_t energyBRaw = combineRegisters(data[2], data[3]);
-        uint32_t energyCRaw = combineRegisters(data[4], data[5]);
+        uint32_t energyARaw = combineRegisters(data[0], data[1], true);
+        uint32_t energyBRaw = combineRegisters(data[2], data[3], true);
+        uint32_t energyCRaw = combineRegisters(data[4], data[5], true);
         
         energyA = energyARaw * PZEM_ENERGY_RESOLUTION;
         energyB = energyBRaw * PZEM_ENERGY_RESOLUTION;
@@ -434,32 +434,44 @@ bool PZEM6L24::setAddress(uint8_t address) {
     return writeMultipleRegisters(_slaveAddr, PZEM_ADDRESS_REG, 1, data, false);
 }
 
-// Set baudrate
-bool PZEM6L24::setBaudrate(uint8_t baudrate) {
-    // Read current connection type to preserve it
-    uint16_t currentData[1];
-    uint8_t currentConnectionType = 0;
-    if (readHoldingRegisters(_slaveAddr, PZEM_BAUDRATE_TYPE_REG, 1, currentData, false)) {
-        currentConnectionType = (currentData[0] >> 8) & 0xFF;
-    }
-    
-    // Prepare the data to write - baudrate in low byte, preserve connection type in high byte
-    uint16_t data[1];
-    data[0] = (currentConnectionType << 8) | baudrate;
-    
-    // Use writeMultipleRegisters to write to register 0x0001
-    return writeMultipleRegisters(_slaveAddr, PZEM_BAUDRATE_TYPE_REG, 1, data, false);
-}
-
-
 // Set baudrate and connection type together
-bool PZEM6L24::setBaudrateAndConnectionType(uint8_t baudrate, uint8_t connectionType) {
+bool PZEM6L24::setBaudrateAndConnectionType(uint8_t baudrate, uint8_t connectionType, bool forceBaudrate) {
     // Prepare the data to write - baudrate in low byte, connectionType in high byte
     uint16_t data[1];
     data[0] = (connectionType << 8) | baudrate;
     
     // Use writeMultipleRegisters to write to register 0x0001
-    return writeMultipleRegisters(_slaveAddr, PZEM_BAUDRATE_TYPE_REG, 1, data, false);
+    bool success = writeMultipleRegisters(_slaveAddr, PZEM_BAUDRATE_TYPE_REG, 1, data, false);
+    
+    // If successful, change the serial baudrate
+    if (success || forceBaudrate) {
+        // Convert baudrate code to actual baudrate value
+        uint32_t newBaudrate;
+        switch (baudrate) {
+            case PZEM_BAUDRATE_2400:   newBaudrate = 2400;   break;
+            case PZEM_BAUDRATE_4800:   newBaudrate = 4800;   break;
+            case PZEM_BAUDRATE_9600:   newBaudrate = 9600;   break;
+            case PZEM_BAUDRATE_19200:  newBaudrate = 19200;  break;
+            case PZEM_BAUDRATE_38400:  newBaudrate = 38400;  break;
+            case PZEM_BAUDRATE_57600:  newBaudrate = 57600;  break;
+            case PZEM_BAUDRATE_115200: newBaudrate = 115200; break;
+            default: newBaudrate = 9600; break; // Default fallback
+        }
+        
+        // Reinitialize serial with new baudrate
+        #if defined(__AVR_ATmega328P__)
+            ((SoftwareSerial*)getSerial())->begin(newBaudrate);
+        #else
+            if (_rxPin != -1 && _txPin != -1) {
+                ((HardwareSerial*)getSerial())->begin(newBaudrate, SERIAL_8N1, _rxPin, _txPin);
+            } else {
+                ((HardwareSerial*)getSerial())->begin(newBaudrate);
+            }
+        #endif
+        clearBuffer();
+    }
+    
+    return success;
 }
 
 // Set frequency type
@@ -495,11 +507,23 @@ uint8_t PZEM6L24::getAddress() {
 }
 
 // Get baudrate
-uint8_t PZEM6L24::getBaudrate() {
+uint32_t PZEM6L24::getBaudrate() {
     uint16_t data[1];
     if (readHoldingRegisters(_slaveAddr, PZEM_BAUDRATE_TYPE_REG, 1, data, false)) {
-        // Return the low byte of the register (baudrate)
-        return data[0] & 0xFF;
+        // Get the baudrate code from low byte
+        uint8_t baudrateCode = data[0] & 0xFF;
+        
+        // Convert baudrate code to actual baudrate value
+        switch (baudrateCode) {
+            case PZEM_BAUDRATE_2400:   return 2400;
+            case PZEM_BAUDRATE_4800:   return 4800;
+            case PZEM_BAUDRATE_9600:   return 9600;
+            case PZEM_BAUDRATE_19200:  return 19200;
+            case PZEM_BAUDRATE_38400:  return 38400;
+            case PZEM_BAUDRATE_57600:  return 57600;
+            case PZEM_BAUDRATE_115200: return 115200;
+            default: return 0; // Unknown baudrate code
+        }
     }
     return 0; // Return 0 if failed to read
 }
