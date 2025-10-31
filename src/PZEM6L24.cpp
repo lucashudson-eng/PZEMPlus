@@ -1,20 +1,38 @@
+/**
+ * @file PZEM6L24.cpp
+ * @brief Implementation of PZEM-6L24 three-phase energy monitoring module class
+ * @author Lucas Hudson
+ * @date 2025
+ */
+
 #include "PZEM6L24.h"
 
-// Constructors
 #if defined(__AVR_ATmega328P__)
+/**
+ * @brief Constructor for AVR ATmega328P (Arduino Uno/Nano) with SoftwareSerial
+ */
 PZEM6L24::PZEM6L24(SoftwareSerial &serial, uint8_t slaveAddr)
     : RS485(&serial), _slaveAddr(slaveAddr) {
 }
 #else
+/**
+ * @brief Constructor for ESP32/ESP8266 with HardwareSerial
+ */
 PZEM6L24::PZEM6L24(HardwareSerial &serial, uint8_t slaveAddr)
     : RS485(&serial), _slaveAddr(slaveAddr), _rxPin(-1), _txPin(-1) {
 }
 
+/**
+ * @brief Constructor for ESP32/ESP8266 with HardwareSerial and custom pins
+ */
 PZEM6L24::PZEM6L24(HardwareSerial &serial, uint8_t rxPin, uint8_t txPin, uint8_t slaveAddr)
     : RS485(&serial), _slaveAddr(slaveAddr), _rxPin(rxPin), _txPin(txPin) {
 }
 #endif
 
+/**
+ * @brief Initialize serial communication
+ */
 void PZEM6L24::begin(uint32_t baudrate) {
     #if defined(__AVR_ATmega328P__)
         ((SoftwareSerial*)getSerial())->begin(baudrate);
@@ -28,7 +46,11 @@ void PZEM6L24::begin(uint32_t baudrate) {
     clearBuffer();
 }
 
-// Basic measurements by phase (0=A, 1=B, 2=C)
+/**
+ * @brief Read voltage for a specific phase
+ * @param phase Phase number (0=A, 1=B, 2=C)
+ * @return Voltage in volts, or NAN on error
+ */
 float PZEM6L24::readVoltage(uint8_t phase) {
     if (phase > 2) return NAN;
     
@@ -548,7 +570,9 @@ uint8_t PZEM6L24::getFrequency() {
     return 0; // Return 0 if failed to read
 }
 
-// Control methods
+/**
+ * @brief Reset energy counter(s)
+ */
 bool PZEM6L24::resetEnergy(uint8_t phaseOption) {
     return RS485::resetEnergy(_slaveAddr, phaseOption);
 }

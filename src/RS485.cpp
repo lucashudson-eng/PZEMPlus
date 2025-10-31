@@ -1,11 +1,23 @@
+/**
+ * @file RS485.cpp
+ * @brief Implementation of RS485 communication class for Modbus-RTU protocol
+ * @author Lucas Hudson
+ * @date 2025
+ */
+
 #include "RS485.h"
 
-// Constructor
+/**
+ * @brief Constructor for RS485 communication class
+ * @param serial Pointer to Stream object (HardwareSerial or SoftwareSerial)
+ */
 RS485::RS485(Stream* serial)
     : _serial(serial), _responseTimeout(100), _rs485_en(-1) {
 }
 
-// Method to read holding registers (function 0x03)
+/**
+ * @brief Read holding registers from Modbus device (function code 0x03)
+ */
 bool RS485::readHoldingRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t numRegs, uint16_t* data, bool big_endian) {
     
     uint8_t request[8];
@@ -102,7 +114,9 @@ bool RS485::readHoldingRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t
     return true;
 }
 
-// Method to read input registers (function 0x04)
+/**
+ * @brief Read input registers from Modbus device (function code 0x04)
+ */
 bool RS485::readInputRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t numRegs, uint16_t* data, bool big_endian) {
     
     uint8_t request[8];
@@ -199,7 +213,9 @@ bool RS485::readInputRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t n
     return true;
 }
 
-// Method to write a single register (function 0x06)
+/**
+ * @brief Write single register to Modbus device (function code 0x06)
+ */
 bool RS485::writeSingleRegister(uint8_t slaveAddr, uint16_t regAddr, uint16_t value, bool big_endian) {
     uint8_t request[8];
     request[0] = slaveAddr;
@@ -287,7 +303,9 @@ bool RS485::writeSingleRegister(uint8_t slaveAddr, uint16_t regAddr, uint16_t va
     return true;
 }
 
-// Method to write multiple registers (function 0x10)
+/**
+ * @brief Write multiple registers to Modbus device (function code 0x10)
+ */
 bool RS485::writeMultipleRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t numRegs, uint16_t* data, bool big_endian) {
     // Calculate total bytes needed: 6 (header) + 1 (byte count) + 2*numRegs (data) + 2 (CRC)
     uint8_t totalBytes = 6 + 1 + (2 * numRegs) + 2;
@@ -390,7 +408,9 @@ bool RS485::writeMultipleRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16
     return true;
 }
 
-// Method to reset energy (function 0x42)
+/**
+ * @brief Reset energy counter (function code 0x42)
+ */
 bool RS485::resetEnergy(uint8_t slaveAddr) {
     uint8_t request[4];
     request[0] = slaveAddr;
@@ -467,7 +487,12 @@ bool RS485::resetEnergy(uint8_t slaveAddr) {
     return true;
 }
 
-// Method to reset energy with phase sequence (for PZEM-6L24)
+/**
+ * @brief Reset energy counter with phase selection (function code 0x42)
+ * 
+ * This overload is used for PZEM-6L24 devices that support selective
+ * phase energy reset.
+ */
 bool RS485::resetEnergy(uint8_t slaveAddr, uint8_t phaseSequence) {
     uint8_t request[6];
     request[0] = slaveAddr;
@@ -546,7 +571,11 @@ bool RS485::resetEnergy(uint8_t slaveAddr, uint8_t phaseSequence) {
     return true;
 }
 
-// Modbus CRC16 calculation
+/**
+ * @brief Calculate Modbus CRC16 checksum
+ * 
+ * Implements the standard Modbus CRC16 algorithm with polynomial 0xA001.
+ */
 uint16_t RS485::calculateCRC16(uint8_t* data, uint8_t length) {
     uint16_t crc = 0xFFFF;
     
@@ -565,7 +594,9 @@ uint16_t RS485::calculateCRC16(uint8_t* data, uint8_t length) {
     return crc;
 }
 
-// CRC16 verification
+/**
+ * @brief Verify Modbus CRC16 checksum in received data
+ */
 bool RS485::verifyCRC16(uint8_t* data, uint8_t length) {
     if (length < 2) {
         return false;
@@ -577,12 +608,16 @@ bool RS485::verifyCRC16(uint8_t* data, uint8_t length) {
     return (calculatedCRC == receivedCRC);
 }
 
-// Configure timeouts
+/**
+ * @brief Set communication timeout
+ */
 void RS485::setTimeouts(uint32_t responseTimeout) {
     _responseTimeout = responseTimeout;
 }
 
-// Set enable pin for MAX485
+/**
+ * @brief Set RS485 enable pin for MAX485 transceiver
+ */
 bool RS485::setEnable(uint8_t enablePin) {
     if (_rs485_en >= 0) {
         _rs485_en = enablePin;
@@ -593,7 +628,9 @@ bool RS485::setEnable(uint8_t enablePin) {
     return false;
 }
 
-// Enable transmit mode (DE/RE = HIGH)
+/**
+ * @brief Enable RS485 transmit mode (DE/RE = HIGH)
+ */
 void RS485::enableTransmit() {
     if (_rs485_en >= 0) {
         digitalWrite(_rs485_en, HIGH);
@@ -601,7 +638,9 @@ void RS485::enableTransmit() {
     }
 }
 
-// Enable receive mode (DE/RE = LOW)
+/**
+ * @brief Enable RS485 receive mode (DE/RE = LOW)
+ */
 void RS485::enableReceive() {
     if (_rs485_en >= 0) {
         digitalWrite(_rs485_en, LOW);
@@ -609,14 +648,18 @@ void RS485::enableReceive() {
     }
 }
 
-// Clear any remaining data in buffer
+/**
+ * @brief Clear serial buffer
+ */
 void RS485::clearBuffer() {
     while (_serial->available()) {
         _serial->read();
     }
 }
 
-// Combine two 16-bit registers into a 32-bit value (unsigned or signed)
+/**
+ * @brief Combine two 16-bit registers into a 32-bit value
+ */
 uint32_t RS485::combineRegisters(uint16_t low, uint16_t high, bool signed_result) {
     uint32_t combined = ((uint32_t)high << 16) | low;
     
@@ -628,7 +671,9 @@ uint32_t RS485::combineRegisters(uint16_t low, uint16_t high, bool signed_result
     return combined;
 }
 
-// Get serial reference
+/**
+ * @brief Get serial stream pointer
+ */
 Stream* RS485::getSerial() {
     return _serial;
 }
