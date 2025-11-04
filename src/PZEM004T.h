@@ -161,14 +161,14 @@ public:
      * @param threshold Power threshold in watts
      * @return true if successful, false otherwise
      */
-    bool setPowerAlarm(float threshold);
+    bool setPowerAlarm(float threshold = 2300.0);
     
     /**
      * @brief Set device slave address
      * @param newAddress New slave address (0x01 to 0xF7)
      * @return true if successful, false otherwise
      */
-    bool setAddress(uint8_t newAddress);
+    bool setAddress(uint8_t newAddress = 0x01);
     
     /**
      * @brief Get power alarm threshold

@@ -151,21 +151,21 @@ public:
      * @param threshold Voltage threshold in volts
      * @return true if successful, false otherwise
      */
-    bool setHighVoltageAlarm(float threshold);
+    bool setHighVoltageAlarm(float threshold = 300.0);
     
     /**
      * @brief Set low voltage alarm threshold
      * @param threshold Voltage threshold in volts
      * @return true if successful, false otherwise
      */
-    bool setLowVoltageAlarm(float threshold);
+    bool setLowVoltageAlarm(float threshold = 7.0);
     
     /**
      * @brief Set device slave address
      * @param newAddress New slave address (0x01 to 0xF7)
      * @return true if successful, false otherwise
      */
-    bool setAddress(uint8_t newAddress);
+    bool setAddress(uint8_t newAddress = 0x01);
 
     /**
      * @brief Get high voltage alarm threshold

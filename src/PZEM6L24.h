@@ -421,14 +421,14 @@ public:
      * @param forceBaudrate If true, change serial baudrate even if write fails
      * @return true if successful, false otherwise
      */
-    bool setBaudrateAndConnectionType(uint32_t baudrate, uint8_t connectionType = PZEM_CONNECTION_3PHASE_4WIRE, bool forceBaudrate = true);
+    bool setBaudrateAndConnectionType(uint32_t baudrate = 9600, uint8_t connectionType = PZEM_CONNECTION_3PHASE_4WIRE, bool forceBaudrate = true);
     
     /**
      * @brief Set AC frequency system (50Hz or 60Hz)
      * @param frequency Frequency value in Hz (50 or 60)
      * @return true if successful, false otherwise
      */
-    bool setFrequency(uint8_t frequency);
+    bool setFrequency(uint8_t frequency = 50);
     
     /**
      * @brief Get addressing mode (software or hardware)

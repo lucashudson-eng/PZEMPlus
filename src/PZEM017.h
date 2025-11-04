@@ -38,7 +38,7 @@ public:
      * @param range Current range value (50, 100, 200, or 300 amperes)
      * @return true if successful, false otherwise
      */
-    bool setCurrentRange(uint16_t range);
+    bool setCurrentRange(uint16_t range = 100);
 
     /**
      * @brief Get current range (PZEM-017 only)
