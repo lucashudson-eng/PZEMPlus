@@ -1,31 +1,31 @@
 /**
- * @file PZEM003017.cpp
- * @brief Implementation of PZEM-003/017 energy monitoring module class
+ * @file PZEM003.cpp
+ * @brief Implementation of PZEM-003 energy monitoring module class
  * @author Lucas Hudson
  * @date 2025
  */
 
-#include "PZEM003017.h"
+#include "PZEM003.h"
 
 #if defined(__AVR_ATmega328P__)
 /**
  * @brief Constructor for AVR ATmega328P (Arduino Uno/Nano) with SoftwareSerial
  */
-PZEM003017::PZEM003017(SoftwareSerial &serial, uint8_t slaveAddr) 
+PZEM003::PZEM003(SoftwareSerial &serial, uint8_t slaveAddr) 
     : RS485(&serial), _slaveAddr(slaveAddr) {
 }
 #else
 /**
  * @brief Constructor for ESP32/ESP8266 with HardwareSerial
  */
-PZEM003017::PZEM003017(HardwareSerial &serial, uint8_t slaveAddr) 
+PZEM003::PZEM003(HardwareSerial &serial, uint8_t slaveAddr) 
     : RS485(&serial), _slaveAddr(slaveAddr), _rxPin(-1), _txPin(-1) {
 }
 
 /**
  * @brief Constructor for ESP32/ESP8266 with HardwareSerial and custom pins
  */
-PZEM003017::PZEM003017(HardwareSerial &serial, uint8_t rxPin, uint8_t txPin, uint8_t slaveAddr) 
+PZEM003::PZEM003(HardwareSerial &serial, uint8_t rxPin, uint8_t txPin, uint8_t slaveAddr) 
     : RS485(&serial), _slaveAddr(slaveAddr), _rxPin(rxPin), _txPin(txPin) {
 }
 #endif
@@ -33,7 +33,7 @@ PZEM003017::PZEM003017(HardwareSerial &serial, uint8_t rxPin, uint8_t txPin, uin
 /**
  * @brief Initialize serial communication
  */
-void PZEM003017::begin(uint32_t baudrate){
+void PZEM003::begin(uint32_t baudrate){
     #if defined(__AVR_ATmega328P__)
         ((SoftwareSerial*)getSerial())->begin(baudrate);
     #else
@@ -49,7 +49,7 @@ void PZEM003017::begin(uint32_t baudrate){
 /**
  * @brief Read voltage from device
  */
-float PZEM003017::readVoltage() {
+float PZEM003::readVoltage() {
     uint16_t data[1];
     if (readInputRegisters(_slaveAddr, PZEM_VOLTAGE_REG, 1, data)) {
         return data[0] * PZEM_VOLTAGE_RESOLUTION;
@@ -60,7 +60,7 @@ float PZEM003017::readVoltage() {
 /**
  * @brief Read current from device
  */
-float PZEM003017::readCurrent() {
+float PZEM003::readCurrent() {
     uint16_t data[1];
     if (readInputRegisters(_slaveAddr, PZEM_CURRENT_REG, 1, data)) {
         return data[0] * PZEM_CURRENT_RESOLUTION;
@@ -71,7 +71,7 @@ float PZEM003017::readCurrent() {
 /**
  * @brief Read power from device
  */
-float PZEM003017::readPower() {
+float PZEM003::readPower() {
     uint16_t data[2];
     if (readInputRegisters(_slaveAddr, PZEM_POWER_LOW_REG, 2, data)) {
         uint32_t powerRaw = combineRegisters(data[0], data[1]);
@@ -83,7 +83,7 @@ float PZEM003017::readPower() {
 /**
  * @brief Read energy from device
  */
-float PZEM003017::readEnergy() {
+float PZEM003::readEnergy() {
     uint16_t data[2];
     if (readInputRegisters(_slaveAddr, PZEM_ENERGY_LOW_REG, 2, data)) {
         uint32_t energyRaw = combineRegisters(data[0], data[1]);
@@ -95,7 +95,7 @@ float PZEM003017::readEnergy() {
 /**
  * @brief Read high voltage alarm status
  */
-bool PZEM003017::readHighVoltageAlarm() {
+bool PZEM003::readHighVoltageAlarm() {
     uint16_t data[1];
     if (readInputRegisters(_slaveAddr, PZEM_HIGH_VOLTAGE_ALARM_REG, 1, data)) {
         return (data[0] == 0xFFFF); // 0xFFFF = active alarm
@@ -106,7 +106,7 @@ bool PZEM003017::readHighVoltageAlarm() {
 /**
  * @brief Read low voltage alarm status
  */
-bool PZEM003017::readLowVoltageAlarm() {
+bool PZEM003::readLowVoltageAlarm() {
     uint16_t data[1];
     if (readInputRegisters(_slaveAddr, PZEM_LOW_VOLTAGE_ALARM_REG, 1, data)) {
         return (data[0] == 0xFFFF); // 0xFFFF = active alarm
@@ -117,7 +117,7 @@ bool PZEM003017::readLowVoltageAlarm() {
 /**
  * @brief Read all measurements at once
  */
-bool PZEM003017::readAll(float* voltage, float* current, float* power, float* energy) {
+bool PZEM003::readAll(float* voltage, float* current, float* power, float* energy) {
     uint16_t data[6];
     
     if (!readInputRegisters(_slaveAddr, PZEM_VOLTAGE_REG, 6, data)) {
@@ -141,7 +141,7 @@ bool PZEM003017::readAll(float* voltage, float* current, float* power, float* en
 /**
  * @brief Set high voltage alarm threshold
  */
-bool PZEM003017::setHighVoltageAlarm(float threshold) {
+bool PZEM003::setHighVoltageAlarm(float threshold) {
     uint16_t thresholdRaw = (uint16_t)(threshold / PZEM_HIGH_VOLTAGE_ALARM_RESOLUTION); // Convert volts to raw value
     return writeSingleRegister(_slaveAddr, PZEM_HIGH_VOLTAGE_THRESHOLD_REG, thresholdRaw);
 }
@@ -149,7 +149,7 @@ bool PZEM003017::setHighVoltageAlarm(float threshold) {
 /**
  * @brief Set low voltage alarm threshold
  */
-bool PZEM003017::setLowVoltageAlarm(float threshold) {
+bool PZEM003::setLowVoltageAlarm(float threshold) {
     uint16_t thresholdRaw = (uint16_t)(threshold / PZEM_LOW_VOLTAGE_ALARM_RESOLUTION); // Convert volts to raw value
     return writeSingleRegister(_slaveAddr, PZEM_LOW_VOLTAGE_THRESHOLD_REG, thresholdRaw);
 }
@@ -157,7 +157,7 @@ bool PZEM003017::setLowVoltageAlarm(float threshold) {
 /**
  * @brief Set device slave address
  */
-bool PZEM003017::setAddress(uint8_t newAddress) {
+bool PZEM003::setAddress(uint8_t newAddress) {
     if (newAddress < 0x01 || newAddress > 0xF7) {
         return false; // Invalid address
     }
@@ -170,36 +170,9 @@ bool PZEM003017::setAddress(uint8_t newAddress) {
 }
 
 /**
- * @brief Set current range (PZEM-017 only)
- */
-bool PZEM003017::setCurrentRange(uint16_t range) {
-    uint16_t rangeValue;
-    
-    // Convert range value to internal constant
-    switch (range) {
-        case 100:
-            rangeValue = PZEM_CURRENT_RANGE_100A;
-            break;
-        case 50:
-            rangeValue = PZEM_CURRENT_RANGE_50A;
-            break;
-        case 200:
-            rangeValue = PZEM_CURRENT_RANGE_200A;
-            break;
-        case 300:
-            rangeValue = PZEM_CURRENT_RANGE_300A;
-            break;
-        default:
-            return false; // Invalid range value
-    }
-    
-    return writeSingleRegister(_slaveAddr, PZEM_CURRENT_RANGE_REG, rangeValue);
-}
-
-/**
  * @brief Get high voltage alarm threshold
  */
-float PZEM003017::getHighVoltageAlarm() {
+float PZEM003::getHighVoltageAlarm() {
     uint16_t data[1];
     if (readHoldingRegisters(_slaveAddr, PZEM_HIGH_VOLTAGE_THRESHOLD_REG, 1, data)) {
         return data[0] * PZEM_HIGH_VOLTAGE_ALARM_RESOLUTION; // Convert raw value to volts
@@ -210,7 +183,7 @@ float PZEM003017::getHighVoltageAlarm() {
 /**
  * @brief Get low voltage alarm threshold
  */
-float PZEM003017::getLowVoltageAlarm() {
+float PZEM003::getLowVoltageAlarm() {
     uint16_t data[1];
     if (readHoldingRegisters(_slaveAddr, PZEM_LOW_VOLTAGE_THRESHOLD_REG, 1, data)) {
         return data[0] * PZEM_LOW_VOLTAGE_ALARM_RESOLUTION; // Convert raw value to volts
@@ -221,7 +194,7 @@ float PZEM003017::getLowVoltageAlarm() {
 /**
  * @brief Get device slave address
  */
-uint8_t PZEM003017::getAddress() {
+uint8_t PZEM003::getAddress() {
     uint16_t data[1];
     if (readHoldingRegisters(_slaveAddr, PZEM_ADDRESS_REG, 1, data)) {
         return data[0];
@@ -230,31 +203,8 @@ uint8_t PZEM003017::getAddress() {
 }
 
 /**
- * @brief Get current range (PZEM-017 only)
- */
-uint16_t PZEM003017::getCurrentRange() {
-    uint16_t data[1];
-    if (readHoldingRegisters(_slaveAddr, PZEM_CURRENT_RANGE_REG, 1, data)) {
-        // Convert internal constant to range value
-        switch (data[0]) {
-            case PZEM_CURRENT_RANGE_100A:
-                return 100;
-            case PZEM_CURRENT_RANGE_50A:
-                return 50;
-            case PZEM_CURRENT_RANGE_200A:
-                return 200;
-            case PZEM_CURRENT_RANGE_300A:
-                return 300;
-            default:
-                return 0; // Unknown range value
-        }
-    }
-    return 0; // Error value
-}
-
-/**
  * @brief Reset energy counter
  */
-bool PZEM003017::resetEnergy() {
+bool PZEM003::resetEnergy() {
     return RS485::resetEnergy(_slaveAddr);
 }

@@ -5,6 +5,51 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2025-01-27
+
+### Added
+- **PZEM-014 Support**: Added PZEM-014 single-phase AC energy monitor class (inherits from PZEM-004T)
+- **PZEM-016 Support**: Added PZEM-016 single-phase AC energy monitor class (inherits from PZEM-004T)
+- **Complete Doxygen Documentation**: Comprehensive API documentation for all classes and methods
+- **Documentation Standardization**: All functions now include @brief, @param, and @return tags
+- **Class Documentation**: Added @class, @defgroup, and @name tags for better code organization
+- **File Headers**: Doxygen file headers with @file, @brief, @author, and @date for all source files
+- **PZEM-6L24 Combined Reading**: Added `readVoltageCurrent()` method to read voltage and current for all three phases simultaneously in a single Modbus request
+
+### Changed
+- **PZEM003017 Separation**: Separated PZEM003017 into two distinct classes:
+  - **PZEM003**: Base class for DC energy monitoring (10A range, built-in shunt)
+  - **PZEM017**: Derived class extending PZEM003 with current range functionality (50A-300A range, external shunt)
+- **Error Return Values**: Changed error return values from `0` to `NAN` for floating-point measurement functions in PZEM003, PZEM017, and PZEM6L24
+- **Return Type Optimization**: Updated return types to use appropriate integer types with sentinel error values:
+  - `getAddress()`: `uint8_t` (returns 0xFF on error)
+  - `getBaudrate()`: `uint32_t` (returns 0 on error)
+  - `getConnectionType()`: `uint8_t` (returns 0xFF on error)
+  - `getFrequency()`: `uint8_t` (returns 50 or 60 Hz, or 0 on error)
+- **Parameter Simplification**: Updated parameter methods to accept direct values instead of internal constants:
+  - `setFrequency()`: Now accepts `50` or `60` directly (Hz) instead of `PZEM_FREQUENCY_*` constants
+  - `setBaudrateAndConnectionType()`: Now accepts baudrate value directly (2400, 4800, 9600, etc.) with automatic validation
+- **Documentation Structure**: Simplified documentation in .cpp files to only @brief, keeping full documentation (with @param and @return) in .h files
+- **Access Specifiers**: Changed `_slaveAddr`, `_rxPin`, and `_txPin` from `private` to `protected` in PZEM003 to allow PZEM017 inheritance
+- **Library Metadata**: Updated library.json and library.properties to include PZEM-014 and PZEM-016
+- **Keywords File**: Updated keywords.txt with PZEM003, PZEM017, PZEM014, and PZEM016, removed PZEM003017
+
+### Fixed
+- **Inheritance Access**: Fixed PZEM017 access to PZEM003 protected members for proper inheritance
+- **Documentation Completeness**: Ensured all public methods have complete Doxygen documentation
+- **File Headers**: Corrected file documentation headers to match actual class implementations
+
+### Improved
+- **Code Documentation**: Professional Doxygen documentation throughout the entire codebase
+- **API Clarity**: Clear parameter and return value documentation for all public methods
+- **API Usability**: More intuitive API with direct value parameters (50/60 Hz, baudrate values) instead of internal constants
+- **Type Safety**: Appropriate return types for integer values (uint8_t, uint32_t) instead of float, improving type safety
+- **Parameter Validation**: Automatic validation of baudrate and frequency values in setter methods
+- **Library Organization**: Better structured class hierarchy with proper inheritance relationships
+- **Error Handling**: Consistent error handling using NAN for floating-point measurements and sentinel values for integer parameters
+- **README Documentation**: Comprehensive updates to README.md including all new devices and architecture changes
+- **Developer Experience**: Improved IDE support with complete keywords.txt and syntax highlighting
+
 ## [0.6.3] - 2025-01-27
 
 ### Added

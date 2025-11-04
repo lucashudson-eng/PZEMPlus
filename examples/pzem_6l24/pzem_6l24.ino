@@ -56,12 +56,12 @@ void setup() {
     // pzem.setAddress(0x00);
 
     // Set baudrate and connection type (same register)
-    // PZEM_BAUDRATE_2400, PZEM_BAUDRATE_4800, PZEM_BAUDRATE_9600, PZEM_BAUDRATE_19200, PZEM_BAUDRATE_38400, PZEM_BAUDRATE_57600, PZEM_BAUDRATE_115200
+    // 2400, 4800, 9600, 19200, 38400, 57600, 115200
     // PZEM_CONNECTION_3PHASE_4WIRE, PZEM_CONNECTION_3PHASE_3WIRE
-    // pzem.setBaudrateAndConnectionType(PZEM_BAUDRATE_9600, PZEM_CONNECTION_3PHASE_4WIRE);
+    // pzem.setBaudrateAndConnectionType(9600, PZEM_CONNECTION_3PHASE_4WIRE);
 
-    // Set frequency system (PZEM_FREQUENCY_50HZ, PZEM_FREQUENCY_60HZ)
-    // pzem.setFrequency(PZEM_FREQUENCY_50HZ);
+    // Set frequency system (50Hz or 60Hz)
+    // pzem.setFrequency(50);
 
     // Reset energy counter (PZEM_RESET_ENERGY_A, PZEM_RESET_ENERGY_B, PZEM_RESET_ENERGY_C, PZEM_RESET_ENERGY_COMBINED, PZEM_RESET_ENERGY_ALL)
     // pzem.resetEnergy(PZEM_RESET_ENERGY_ALL);

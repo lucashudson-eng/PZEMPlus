@@ -48,8 +48,6 @@ void PZEM6L24::begin(uint32_t baudrate) {
 
 /**
  * @brief Read voltage for a specific phase
- * @param phase Phase number (0=A, 1=B, 2=C)
- * @return Voltage in volts, or NAN on error
  */
 float PZEM6L24::readVoltage(uint8_t phase) {
     if (phase > 2) return NAN;
@@ -61,6 +59,9 @@ float PZEM6L24::readVoltage(uint8_t phase) {
     return NAN;
 }
 
+/**
+ * @brief Read current for a specific phase
+ */
 float PZEM6L24::readCurrent(uint8_t phase) {
     if (phase > 2) return NAN;
     
@@ -71,6 +72,9 @@ float PZEM6L24::readCurrent(uint8_t phase) {
     return NAN;
 }
 
+/**
+ * @brief Read frequency for a specific phase
+ */
 float PZEM6L24::readFrequency(uint8_t phase) {
     if (phase > 2) return NAN;
     
@@ -81,6 +85,9 @@ float PZEM6L24::readFrequency(uint8_t phase) {
     return NAN;
 }
 
+/**
+ * @brief Read active power for a specific phase
+ */
 float PZEM6L24::readActivePower(uint8_t phase) {
     if (phase > 2) return NAN;
     
@@ -92,6 +99,9 @@ float PZEM6L24::readActivePower(uint8_t phase) {
     return NAN;
 }
 
+/**
+ * @brief Read reactive power for a specific phase
+ */
 float PZEM6L24::readReactivePower(uint8_t phase) {
     if (phase > 2) return NAN;
     
@@ -103,6 +113,9 @@ float PZEM6L24::readReactivePower(uint8_t phase) {
     return NAN;
 }
 
+/**
+ * @brief Read apparent power for a specific phase
+ */
 float PZEM6L24::readApparentPower(uint8_t phase) {
     if (phase > 2) return NAN;
     
@@ -114,6 +127,9 @@ float PZEM6L24::readApparentPower(uint8_t phase) {
     return NAN;
 }
 
+/**
+ * @brief Read power factor for a specific phase
+ */
 float PZEM6L24::readPowerFactor(uint8_t phase) {
     if (phase > 2) return NAN;
     
@@ -142,6 +158,9 @@ float PZEM6L24::readPowerFactor(uint8_t phase) {
     return NAN;
 }
 
+/**
+ * @brief Read active energy for a specific phase
+ */
 float PZEM6L24::readActiveEnergy(uint8_t phase) {
     if (phase > 2) return NAN;
     
@@ -153,6 +172,9 @@ float PZEM6L24::readActiveEnergy(uint8_t phase) {
     return NAN;
 }
 
+/**
+ * @brief Read reactive energy for a specific phase
+ */
 float PZEM6L24::readReactiveEnergy(uint8_t phase) {
     if (phase > 2) return NAN;
     
@@ -164,6 +186,9 @@ float PZEM6L24::readReactiveEnergy(uint8_t phase) {
     return NAN;
 }
 
+/**
+ * @brief Read apparent energy for a specific phase
+ */
 float PZEM6L24::readApparentEnergy(uint8_t phase) {
     if (phase > 2) return NAN;
     
@@ -175,6 +200,9 @@ float PZEM6L24::readApparentEnergy(uint8_t phase) {
     return NAN;
 }
 
+/**
+ * @brief Read voltage phase angle for a specific phase
+ */
 float PZEM6L24::readVoltagePhaseAngle(uint8_t phase) {
     if (phase > 2) return NAN;
     
@@ -190,6 +218,9 @@ float PZEM6L24::readVoltagePhaseAngle(uint8_t phase) {
     return NAN;
 }
 
+/**
+ * @brief Read current phase angle for a specific phase
+ */
 float PZEM6L24::readCurrentPhaseAngle(uint8_t phase) {
     if (phase > 2) return NAN;
     
@@ -200,7 +231,9 @@ float PZEM6L24::readCurrentPhaseAngle(uint8_t phase) {
     return NAN;
 }
 
-// Combined measurements
+/**
+ * @brief Read combined active power (all three phases)
+ */
 float PZEM6L24::readActivePower() {
     uint16_t data[2];
     if (readInputRegisters(_slaveAddr, PZEM_ACTIVE_POWER_COMBINED_REG, 2, data, false)) {
@@ -210,6 +243,9 @@ float PZEM6L24::readActivePower() {
     return NAN;
 }
 
+/**
+ * @brief Read combined reactive power (all three phases)
+ */
 float PZEM6L24::readReactivePower() {
     uint16_t data[2];
     if (readInputRegisters(_slaveAddr, PZEM_REACTIVE_POWER_COMBINED_REG, 2, data, false)) {
@@ -219,6 +255,9 @@ float PZEM6L24::readReactivePower() {
     return NAN;
 }
 
+/**
+ * @brief Read combined apparent power (all three phases)
+ */
 float PZEM6L24::readApparentPower() {
     uint16_t data[2];
     if (readInputRegisters(_slaveAddr, PZEM_APPARENT_POWER_COMBINED_REG, 2, data, false)) {
@@ -228,6 +267,9 @@ float PZEM6L24::readApparentPower() {
     return NAN;
 }
 
+/**
+ * @brief Read combined power factor (all three phases)
+ */
 float PZEM6L24::readPowerFactor() {
     uint16_t data[1];
     if (readInputRegisters(_slaveAddr, PZEM_POWER_FACTOR_C_COMBINED_REG, 1, data, false)) {
@@ -238,6 +280,9 @@ float PZEM6L24::readPowerFactor() {
     return NAN;
 }
 
+/**
+ * @brief Read combined active energy (all three phases)
+ */
 float PZEM6L24::readActiveEnergy() {
     uint16_t data[2];
     if (readInputRegisters(_slaveAddr, PZEM_ACTIVE_ENERGY_COMBINED_REG, 2, data, false)) {
@@ -247,6 +292,9 @@ float PZEM6L24::readActiveEnergy() {
     return NAN;
 }
 
+/**
+ * @brief Read combined reactive energy (all three phases)
+ */
 float PZEM6L24::readReactiveEnergy() {
     uint16_t data[2];
     if (readInputRegisters(_slaveAddr, PZEM_REACTIVE_ENERGY_COMBINED_REG, 2, data, false)) {
@@ -256,6 +304,9 @@ float PZEM6L24::readReactiveEnergy() {
     return NAN;
 }
 
+/**
+ * @brief Read combined apparent energy (all three phases)
+ */
 float PZEM6L24::readApparentEnergy() {
     uint16_t data[2];
     if (readInputRegisters(_slaveAddr, PZEM_APPARENT_ENERGY_COMBINED_REG, 2, data, false)) {
@@ -265,7 +316,9 @@ float PZEM6L24::readApparentEnergy() {
     return NAN;
 }
 
-// Multi-phase reading methods
+/**
+ * @brief Read voltage for all three phases simultaneously
+ */
 void PZEM6L24::readVoltage(float& voltageA, float& voltageB, float& voltageC) {
     uint16_t data[3];
     if (readInputRegisters(_slaveAddr, PZEM_VOLTAGE_REG, 3, data, false)) {
@@ -277,6 +330,9 @@ void PZEM6L24::readVoltage(float& voltageA, float& voltageB, float& voltageC) {
     }
 }
 
+/**
+ * @brief Read current for all three phases simultaneously
+ */
 void PZEM6L24::readCurrent(float& currentA, float& currentB, float& currentC) {
     uint16_t data[3];
     if (readInputRegisters(_slaveAddr, PZEM_CURRENT_REG, 3, data, false)) {
@@ -288,6 +344,9 @@ void PZEM6L24::readCurrent(float& currentA, float& currentB, float& currentC) {
     }
 }
 
+/**
+ * @brief Read frequency for all three phases simultaneously
+ */
 void PZEM6L24::readFrequency(float& frequencyA, float& frequencyB, float& frequencyC) {
     uint16_t data[3];
     if (readInputRegisters(_slaveAddr, PZEM_FREQUENCY_REG, 3, data, false)) {
@@ -299,6 +358,27 @@ void PZEM6L24::readFrequency(float& frequencyA, float& frequencyB, float& freque
     }
 }
 
+/**
+ * @brief Read voltage and current for all three phases simultaneously
+ */
+void PZEM6L24::readVoltageCurrent(float& voltageA, float& voltageB, float& voltageC, float& currentA, float& currentB, float& currentC) {
+    uint16_t data[6];
+    if (readInputRegisters(_slaveAddr, PZEM_VOLTAGE_REG, 6, data, false)) {
+        voltageA = data[0] * PZEM_VOLTAGE_RESOLUTION;
+        voltageB = data[1] * PZEM_VOLTAGE_RESOLUTION;
+        voltageC = data[2] * PZEM_VOLTAGE_RESOLUTION;
+        currentA = data[3] * PZEM_CURRENT_RESOLUTION;
+        currentB = data[4] * PZEM_CURRENT_RESOLUTION;
+        currentC = data[5] * PZEM_CURRENT_RESOLUTION;
+    } else {
+        voltageA = voltageB = voltageC = NAN;
+        currentA = currentB = currentC = NAN;
+    }
+}
+
+/**
+ * @brief Read active power for all three phases simultaneously
+ */
 void PZEM6L24::readActivePower(float& powerA, float& powerB, float& powerC) {
     uint16_t data[6];
     if (readInputRegisters(_slaveAddr, PZEM_ACTIVE_POWER_REG, 6, data, false)) {
@@ -314,6 +394,9 @@ void PZEM6L24::readActivePower(float& powerA, float& powerB, float& powerC) {
     }
 }
 
+/**
+ * @brief Read reactive power for all three phases simultaneously
+ */
 void PZEM6L24::readReactivePower(float& powerA, float& powerB, float& powerC) {
     uint16_t data[6];
     if (readInputRegisters(_slaveAddr, PZEM_REACTIVE_POWER_REG, 6, data, false)) {
@@ -329,6 +412,9 @@ void PZEM6L24::readReactivePower(float& powerA, float& powerB, float& powerC) {
     }
 }
 
+/**
+ * @brief Read apparent power for all three phases simultaneously
+ */
 void PZEM6L24::readApparentPower(float& powerA, float& powerB, float& powerC) {
     uint16_t data[6];
     if (readInputRegisters(_slaveAddr, PZEM_APPARENT_POWER_REG, 6, data, false)) {
@@ -344,6 +430,9 @@ void PZEM6L24::readApparentPower(float& powerA, float& powerB, float& powerC) {
     }
 }
 
+/**
+ * @brief Read power factor for all three phases simultaneously
+ */
 void PZEM6L24::readPowerFactor(float& factorA, float& factorB, float& factorC) {
     // Read both power factor registers in one call for efficiency
     uint16_t data[2];
@@ -366,6 +455,9 @@ void PZEM6L24::readPowerFactor(float& factorA, float& factorB, float& factorC) {
     }
 }
 
+/**
+ * @brief Read active energy for all three phases simultaneously
+ */
 void PZEM6L24::readActiveEnergy(float& energyA, float& energyB, float& energyC) {
     uint16_t data[6];
     if (readInputRegisters(_slaveAddr, PZEM_ACTIVE_ENERGY_REG, 6, data, false)) {
@@ -381,6 +473,9 @@ void PZEM6L24::readActiveEnergy(float& energyA, float& energyB, float& energyC) 
     }
 }
 
+/**
+ * @brief Read reactive energy for all three phases simultaneously
+ */
 void PZEM6L24::readReactiveEnergy(float& energyA, float& energyB, float& energyC) {
     uint16_t data[6];
     if (readInputRegisters(_slaveAddr, PZEM_REACTIVE_ENERGY_REG, 6, data, false)) {
@@ -396,6 +491,9 @@ void PZEM6L24::readReactiveEnergy(float& energyA, float& energyB, float& energyC
     }
 }
 
+/**
+ * @brief Read apparent energy for all three phases simultaneously
+ */
 void PZEM6L24::readApparentEnergy(float& energyA, float& energyB, float& energyC) {
     uint16_t data[6];
     if (readInputRegisters(_slaveAddr, PZEM_APPARENT_ENERGY_REG, 6, data, false)) {
@@ -411,6 +509,9 @@ void PZEM6L24::readApparentEnergy(float& energyA, float& energyB, float& energyC
     }
 }
 
+/**
+ * @brief Read voltage phase angle for all three phases simultaneously
+ */
 void PZEM6L24::readVoltagePhaseAngle(float& angleA, float& angleB, float& angleC) {
     uint16_t data[2];
     if (readInputRegisters(_slaveAddr, PZEM_VOLTAGE_PHASE_REG, 2, data, false)) {
@@ -422,6 +523,9 @@ void PZEM6L24::readVoltagePhaseAngle(float& angleA, float& angleB, float& angleC
     }
 }
 
+/**
+ * @brief Read current phase angle for all three phases simultaneously
+ */
 void PZEM6L24::readCurrentPhaseAngle(float& angleA, float& angleB, float& angleC) {
     uint16_t data[3];
     if (readInputRegisters(_slaveAddr, PZEM_CURRENT_PHASE_REG, 3, data, false)) {
@@ -433,8 +537,9 @@ void PZEM6L24::readCurrentPhaseAngle(float& angleA, float& angleB, float& angleC
     }
 }
 
-
-// Set slave address
+/**
+ * @brief Set device slave address
+ */
 bool PZEM6L24::setAddress(uint8_t address) {
     // Validate address range
     if (address > 0xF7) {
@@ -456,38 +561,40 @@ bool PZEM6L24::setAddress(uint8_t address) {
     return writeMultipleRegisters(_slaveAddr, PZEM_ADDRESS_REG, 1, data, false);
 }
 
-// Set baudrate and connection type together
-bool PZEM6L24::setBaudrateAndConnectionType(uint8_t baudrate, uint8_t connectionType, bool forceBaudrate) {
+/**
+ * @brief Set baudrate and connection type simultaneously
+ */
+bool PZEM6L24::setBaudrateAndConnectionType(uint32_t baudrate, uint8_t connectionType, bool forceBaudrate) {
+    // Convert baudrate value to baudrate code
+    uint8_t baudrateCode;
+    switch (baudrate) {
+        case 2400:   baudrateCode = PZEM_BAUDRATE_2400;   break;
+        case 4800:   baudrateCode = PZEM_BAUDRATE_4800;   break;
+        case 9600:   baudrateCode = PZEM_BAUDRATE_9600;   break;
+        case 19200:  baudrateCode = PZEM_BAUDRATE_19200;  break;
+        case 38400:  baudrateCode = PZEM_BAUDRATE_38400;  break;
+        case 57600:  baudrateCode = PZEM_BAUDRATE_57600;  break;
+        case 115200: baudrateCode = PZEM_BAUDRATE_115200; break;
+        default: return false; // Invalid baudrate value
+    }
+    
     // Prepare the data to write - baudrate in low byte, connectionType in high byte
     uint16_t data[1];
-    data[0] = (connectionType << 8) | baudrate;
+    data[0] = (connectionType << 8) | baudrateCode;
     
     // Use writeMultipleRegisters to write to register 0x0001
     bool success = writeMultipleRegisters(_slaveAddr, PZEM_BAUDRATE_TYPE_REG, 1, data, false);
     
     // If successful, change the serial baudrate
     if (success || forceBaudrate) {
-        // Convert baudrate code to actual baudrate value
-        uint32_t newBaudrate;
-        switch (baudrate) {
-            case PZEM_BAUDRATE_2400:   newBaudrate = 2400;   break;
-            case PZEM_BAUDRATE_4800:   newBaudrate = 4800;   break;
-            case PZEM_BAUDRATE_9600:   newBaudrate = 9600;   break;
-            case PZEM_BAUDRATE_19200:  newBaudrate = 19200;  break;
-            case PZEM_BAUDRATE_38400:  newBaudrate = 38400;  break;
-            case PZEM_BAUDRATE_57600:  newBaudrate = 57600;  break;
-            case PZEM_BAUDRATE_115200: newBaudrate = 115200; break;
-            default: newBaudrate = 9600; break; // Default fallback
-        }
-        
         // Reinitialize serial with new baudrate
         #if defined(__AVR_ATmega328P__)
-            ((SoftwareSerial*)getSerial())->begin(newBaudrate);
+            ((SoftwareSerial*)getSerial())->begin(baudrate);
         #else
             if (_rxPin != -1 && _txPin != -1) {
-                ((HardwareSerial*)getSerial())->begin(newBaudrate, SERIAL_8N1, _rxPin, _txPin);
+                ((HardwareSerial*)getSerial())->begin(baudrate, SERIAL_8N1, _rxPin, _txPin);
             } else {
-                ((HardwareSerial*)getSerial())->begin(newBaudrate);
+                ((HardwareSerial*)getSerial())->begin(baudrate);
             }
         #endif
         clearBuffer();
@@ -496,19 +603,29 @@ bool PZEM6L24::setBaudrateAndConnectionType(uint8_t baudrate, uint8_t connection
     return success;
 }
 
-// Set frequency type
+/**
+ * @brief Set AC frequency system (50Hz or 60Hz)
+ */
 bool PZEM6L24::setFrequency(uint8_t frequency) {
+    // Convert frequency value to frequency code
+    uint8_t frequencyCode;
+    switch (frequency) {
+        case 50: frequencyCode = PZEM_FREQUENCY_50HZ; break;
+        case 60: frequencyCode = PZEM_FREQUENCY_60HZ; break;
+        default: return false; // Invalid frequency value
+    }
+    
     // Prepare the data to write - frequency goes in the low byte of register 0x0002
     uint16_t data[1];
-    
-    // Set low byte to frequency value
-    data[0] = frequency;
+    data[0] = frequencyCode;
     
     // Use writeMultipleRegisters to write to register 0x0002
     return writeMultipleRegisters(_slaveAddr, PZEM_FREQUENCY_SYSTEM_REG, 1, data, false);
 }
 
-// Get software hardware or software addressing settings
+/**
+ * @brief Get addressing mode (software or hardware)
+ */
 bool PZEM6L24::getSoftwareHardwareSettings() {
     uint16_t data[1];
     if (readHoldingRegisters(_slaveAddr, PZEM_ADDRESS_REG, 1, data, false)) {
@@ -518,17 +635,21 @@ bool PZEM6L24::getSoftwareHardwareSettings() {
     return false;
 }
 
-// Get slave address
+/**
+ * @brief Get device slave address
+ */
 uint8_t PZEM6L24::getAddress() {
     uint16_t data[1];
     if (readHoldingRegisters(_slaveAddr, PZEM_ADDRESS_REG, 1, data, false)) {
         // Return the high byte of the register (address)
-        return (data[0] >> 8) & 0xFF;
+        return (uint8_t)((data[0] >> 8) & 0xFF);
     }
-    return 0; // Return 0 if failed to read
+    return 0xFF; // Error value
 }
 
-// Get baudrate
+/**
+ * @brief Get current baudrate setting
+ */
 uint32_t PZEM6L24::getBaudrate() {
     uint16_t data[1];
     if (readHoldingRegisters(_slaveAddr, PZEM_BAUDRATE_TYPE_REG, 1, data, false)) {
@@ -547,27 +668,38 @@ uint32_t PZEM6L24::getBaudrate() {
             default: return 0; // Unknown baudrate code
         }
     }
-    return 0; // Return 0 if failed to read
+    return 0; // Error value
 }
 
-// Get connection type
+/**
+ * @brief Get connection type setting
+ */
 uint8_t PZEM6L24::getConnectionType() {
     uint16_t data[1];
     if (readHoldingRegisters(_slaveAddr, PZEM_BAUDRATE_TYPE_REG, 1, data, false)) {
         // Return the high byte of the register (connection type)
-        return (data[0] >> 8) & 0xFF;
+        return (uint8_t)((data[0] >> 8) & 0xFF);
     }
-    return 0; // Return 0 if failed to read
+    return 0xFF; // Error value
 }
 
-// Get frequency type
+/**
+ * @brief Get AC frequency system setting
+ */
 uint8_t PZEM6L24::getFrequency() {
     uint16_t data[1];
     if (readHoldingRegisters(_slaveAddr, PZEM_FREQUENCY_SYSTEM_REG, 1, data, false)) {
-        // Return the low byte of the register (frequency type)
-        return data[0] & 0xFF;
+        // Get the frequency code from low byte
+        uint8_t frequencyCode = data[0] & 0xFF;
+        
+        // Convert frequency code to actual frequency value
+        switch (frequencyCode) {
+            case PZEM_FREQUENCY_50HZ: return 50;
+            case PZEM_FREQUENCY_60HZ: return 60;
+            default: return 0; // Unknown frequency code
+        }
     }
-    return 0; // Return 0 if failed to read
+    return 0; // Error value
 }
 
 /**

@@ -1,6 +1,6 @@
 # PZEMPlus
 
-![Version](https://img.shields.io/badge/version-0.6.3-blue.svg)
+![Version](https://img.shields.io/badge/version-0.7.0-blue.svg)
 ![License](https://img.shields.io/badge/license-GPL--3.0-green.svg)
 ![Platform](https://img.shields.io/badge/platform-Arduino%20%7C%20ESP32-orange.svg)
 
@@ -10,12 +10,14 @@ PZEMPlus is an Arduino/ESP32 library to easily read data from Peacefair energy m
 
 ### AC Energy Monitors
 - PZEM-004T (Single-phase AC, 10A built-in shunt, 100A external shunt)
+- PZEM-014 (Single-phase AC, 10A built-in shunt, same functionality as PZEM-004T)
+- PZEM-016 (Single-phase AC, 100A external shunt, same functionality as PZEM-004T)
 - PZEM-6L24 (3-phase AC, 100A external shunt)
 - PZIOT-E02 (IoT single-phase AC monitor, 100A built-in shunt)
 
 ### DC Power Monitors
 - PZEM-003 (DC, 10A range, built-in shunt)
-- PZEM-017 (DC, 50A/100A/200A/300A range, external shunt)
+- PZEM-017 (DC, 50A/100A/200A/300A range, external shunt, extends from PZEM-003 to add current range)
 
 ## Installation
 Install via Arduino or PlatformIO Library Manager, or download from GitHub releases.
@@ -24,9 +26,11 @@ Install via Arduino or PlatformIO Library Manager, or download from GitHub relea
 
 ### Basic Setup (Single Device)
 
-#### For AC Energy Monitors (PZEM-004T/PZEM-6L24)
+#### For AC Energy Monitors (PZEM-004T/PZEM-014/PZEM-016/PZEM-6L24)
 ```cpp
 #define PZEM_004T
+// #define PZEM_014
+// #define PZEM_016
 // #define PZEM_6L24
 
 #include <PZEMPlus.h>
@@ -90,7 +94,7 @@ void loop() {
 
 ### Reading Measurements
 
-#### For AC Energy Monitors (PZEM-004T)
+#### For AC Energy Monitors (PZEM-004T/PZEM-014/PZEM-016)
 ```cpp
 // Read individual measurements
 float voltage = pzem.readVoltage();
@@ -163,7 +167,7 @@ pzem.resetEnergy(PZEM_RESET_ENERGY_ALL);
 
 ### Device Configuration
 
-#### For AC Energy Monitors (PZEM-004T)
+#### For AC Energy Monitors (PZEM-004T/PZEM-014/PZEM-016)
 ```cpp
 // Set power alarm threshold (1W precision for alarm, 0.1W for measurements)
 pzem.setPowerAlarm(2300.0); // 2300W threshold
@@ -184,24 +188,24 @@ uint8_t address = pzem.getAddress();
 // Change device software address
 pzem.setAddress(0x01);
 
-// Use of hadrware address
+// Use of hardware address
 pzem.setAddress(0x00);
 
 // Set baudrate and connection type (same register)
-pzem.setBaudrateAndConnectionType(PZEM_BAUDRATE_9600, PZEM_CONNECTION_3PHASE_4WIRE);
+pzem.setBaudrateAndConnectionType(9600, PZEM_CONNECTION_3PHASE_4WIRE);
 
 // Set frequency system
-pzem.setFrequency(PZEM_FREQUENCY_50HZ);
+pzem.setFrequency(50); // or 60 for 60Hz
 
 // Reset energy counter (by phase, combined or all)
 pzem.resetEnergy(PZEM_RESET_ENERGY_ALL); // Reset all phases
 
 // Get current settings
-uint8_t address = pzem.getAddress(); // Returns 0x01
-bool software = pzem.getSoftwareHardwareSettings(); // Returns 0 (Hardware)
-uint8_t baudrate = pzem.getBaudrate(); // Returns 2 (9600)
-uint8_t connection = pzem.getConnectionType(); // Returns 0 (3 phases 4 wires)
-uint8_t frequency = pzem.getFrequency(); // Returns 0 (50Hz)
+uint8_t address = pzem.getAddress(); // Returns 0x01 (or 0xFF on error)
+bool software = pzem.getSoftwareHardwareSettings(); // Returns true (software) or false (hardware)
+uint32_t baudrate = pzem.getBaudrate(); // Returns 9600 (or 0 on error)
+uint8_t connection = pzem.getConnectionType(); // Returns 0 (3 phases 4 wires) or 1 (3 phases 3 wires), or 0xFF on error
+uint8_t frequency = pzem.getFrequency(); // Returns 50 or 60 (Hz), or 0 on error
 ```
 
 #### For DC Energy Monitors (PZEM-003/017)
@@ -231,7 +235,7 @@ uint16_t currentRange = pzem.getCurrentRange(); // Returns 300A (PZEM-017 only)
 
 ## Precision and Resolutions
 
-### PZEM-004T (AC Energy Monitor)
+### PZEM-004T/PZEM-014/PZEM-016 (AC Energy Monitors)
 
 | Parameter | Resolution | Accuracy | Min Value | Max Value | Unit |
 |-----------|------------|----------|-----------|-----------|------|
@@ -295,16 +299,31 @@ pzem.setTimeouts(100); // 100ms timeout
 
 The library includes comprehensive examples for all supported devices:
 
-- **PZEM-004T**: `examples/pzem_004t/pzem_004t.ino` - Single-phase energy monitoring
-- **Multi-Device**: `examples/multiDevice/multiDevice.ino` - Multiple devices management exampled with PZEM-004T
+- **PZEM-004T**: `examples/pzem_004t/pzem_004t.ino` - Single-phase energy monitoring (also works for PZEM-014 and PZEM-016)
+- **Multi-Device**: `examples/multiDevice/multiDevice.ino` - Multiple devices management example with PZEM-004T
 - **Address Change**: `examples/changeAddress/changeAddress.ino` - Device address configuration
-- **PZEM-003/017**: `examples/pzem_003_017/pzem_003_017.ino` - DC energy monitoring
+- **PZEM-003**: `examples/pzem_003/pzem_003.ino` - DC energy monitoring (PZEM-003)
+- **PZEM-017**: `examples/pzem_017/pzem_017.ino` - DC energy monitoring (PZEM-017 with current range)
 - **PZEM-6L24**: `examples/pzem_6l24/pzem_6l24.ino` - Three-phase energy monitoring
 
 ## Supported Models
 
 ### Fully Implemented
 - **PZEM-004T**: Single-phase AC energy monitor with complete functionality (10A range, built-in shunt/100A range, external shunt)
+  - All measurement parameters (voltage, current, power, energy, frequency, power factor)
+  - Device configuration (power alarm threshold, address setting)
+  - Energy counter reset functionality
+  - Batch reading for efficiency
+
+- **PZEM-014**: Single-phase AC energy monitor with complete functionality (10A range, built-in shunt)
+  - Same functionality as PZEM-004T
+  - All measurement parameters (voltage, current, power, energy, frequency, power factor)
+  - Device configuration (power alarm threshold, address setting)
+  - Energy counter reset functionality
+  - Batch reading for efficiency
+
+- **PZEM-016**: Single-phase AC energy monitor with complete functionality (100A range, external shunt)
+  - Same functionality as PZEM-004T
   - All measurement parameters (voltage, current, power, energy, frequency, power factor)
   - Device configuration (power alarm threshold, address setting)
   - Energy counter reset functionality
@@ -338,8 +357,10 @@ The library includes comprehensive examples for all supported devices:
 
 ### Implementation Status
 - ✅ **PZEM-004T**: Complete implementation with full feature set
+- ✅ **PZEM-014**: Complete implementation with full feature set (inherits from PZEM-004T)
+- ✅ **PZEM-016**: Complete implementation with full feature set (inherits from PZEM-004T)
 - ✅ **PZEM-003**: Complete implementation with full feature set  
-- ✅ **PZEM-017**: Complete implementation with full feature set
+- ✅ **PZEM-017**: Complete implementation with full feature set (extends from PZEM-003 to add current range)
 - ✅ **PZEM-6L24**: Complete implementation with full feature set
 - 🚧 **PZIOT-E02**: Class structure created, implementation pending
 

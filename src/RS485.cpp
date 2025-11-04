@@ -9,7 +9,6 @@
 
 /**
  * @brief Constructor for RS485 communication class
- * @param serial Pointer to Stream object (HardwareSerial or SoftwareSerial)
  */
 RS485::RS485(Stream* serial)
     : _serial(serial), _responseTimeout(100), _rs485_en(-1) {
@@ -619,13 +618,10 @@ void RS485::setTimeouts(uint32_t responseTimeout) {
  * @brief Set RS485 enable pin for MAX485 transceiver
  */
 bool RS485::setEnable(uint8_t enablePin) {
-    if (_rs485_en >= 0) {
-        _rs485_en = enablePin;
-        pinMode(_rs485_en, OUTPUT);
-        enableReceive(); // Start in receive mode
-        return true;
-    }
-    return false;
+    _rs485_en = enablePin;
+    pinMode(_rs485_en, OUTPUT);
+    enableReceive(); // Start in receive mode
+    return true;
 }
 
 /**

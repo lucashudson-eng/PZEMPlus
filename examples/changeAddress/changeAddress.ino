@@ -14,6 +14,8 @@
 
 // Define the PZEM model to use:
 #define PZEM_004T
+// #define PZEM_014
+// #define PZEM_016
 // #define PZEM_003
 // #define PZEM_017
 // #define PZEM_6L24

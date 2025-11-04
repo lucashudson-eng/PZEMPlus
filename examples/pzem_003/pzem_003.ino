@@ -1,7 +1,7 @@
 /*
-* PZEM-003/017 Example
+* PZEM-003 Example
 *
-* This example demonstrates how to use the PZEMPlus library with PZEM-003/017
+* This example demonstrates how to use the PZEMPlus library with PZEM-003
 * energy monitoring device. It shows both individual measurement methods
 * and the efficient batch reading method.
 *
@@ -11,8 +11,7 @@
 * License: GPL-3.0
 */
 
-// #define PZEM_003
-#define PZEM_017
+#define PZEM_003
 
 #include <PZEMPlus.h>
 
@@ -48,8 +47,6 @@ void setup(){
 
   Serial.print("Address: ");
   Serial.println(pzem.getAddress());
-  Serial.print("Current range (PZEM-017 only): ");
-  Serial.println(pzem.getCurrentRange());
   Serial.print("High voltage alarm threshold: ");
   Serial.println(pzem.getHighVoltageAlarm());
   Serial.print("Low voltage alarm threshold: ");
@@ -58,9 +55,6 @@ void setup(){
   // Set address to 0x01 (0x01 to 0xF7)
   // pzem.setAddress(0x01);
 
-  // Set current range to 50, 100, 200 or 300A (PZEM-017 only)
-  // pzem.setCurrentRange(300);
-
   // Set low and high voltage alarm thresholds
   // pzem.setLowVoltageAlarm(7);
   // pzem.setHighVoltageAlarm(300);
@@ -68,7 +62,7 @@ void setup(){
   // Reset energy counter
   // pzem.resetEnergy();
 
-  Serial.println("PZEM-003/017 started");
+  Serial.println("PZEM-003 started");
   Serial.println("Waiting for measurements...");
 }
 
