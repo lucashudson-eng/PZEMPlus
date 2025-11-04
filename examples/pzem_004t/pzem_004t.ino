@@ -12,6 +12,8 @@
 */
 
 #define PZEM_004T
+// #define PZEM_014
+// #define PZEM_016
 
 #include <PZEMPlus.h>
 
