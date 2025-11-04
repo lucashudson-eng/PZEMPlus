@@ -13,7 +13,7 @@
  * - PZEM_003: For PZEM-003 DC module
  * - PZEM_017: For PZEM-017 DC module (extends PZEM-003 with current range)
  * - PZEM_6L24: For PZEM-6L24 three-phase module
- * - PZEM_IOT_E02: For PZEM IoT-E02 module (pending implementation)
+ * - PZIOT_E02: For PZIOT-E02 module (pending implementation)
  * 
  * @example
  * @code
@@ -69,15 +69,15 @@ typedef PZEM017 PZEMPlus;
  */
 typedef PZEM6L24 PZEMPlus;
 
-#elif defined(PZEM_IOT_E02)
-#include "PZEMIOTE02.h"
+#elif defined(PZIOT_E02)
+#include "PZIOTE02.h"
 /** @typedef PZEMPlus
- *  @brief Type alias for PZEMIOTE02 when PZEM_IOT_E02 is defined
+ *  @brief Type alias for PZIOTE02 when PZIOT_E02 is defined
  */
-typedef PZEMIOTE02 PZEMPlus;
+typedef PZIOTE02 PZEMPlus;
 
 #else
-#error "Please define Peacefair PZEM model: PZEM_004T, PZEM_014, PZEM_016, PZEM_003, PZEM_017, PZEM_6L24, or PZEM_IOT_E02"
+#error "Please define Peacefair PZEM model: PZEM_004T, PZEM_014, PZEM_016, PZEM_003, PZEM_017, PZEM_6L24, or PZIOT_E02"
 #endif
 
 #endif // PZEMPLUS_H

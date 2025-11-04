@@ -4,7 +4,7 @@
 ![License](https://img.shields.io/badge/license-GPL--3.0-green.svg)
 ![Platform](https://img.shields.io/badge/platform-Arduino%20%7C%20ESP32-orange.svg)
 
-PZEMPlus is an Arduino/ESP32 library to easily read data from Peacefair energy monitoring devices.
+PZEMPlus is an Arduino/ESP32 library to read data from Peacefair energy monitoring devices.
 
 ## Supported Devices
 
@@ -46,9 +46,6 @@ PZEMPlus pzem(Serial2);
 #include <PZEMPlus.h>
 
 PZEMPlus pzem(Serial2);
-
-// For MAX485 module (optional)
-// pzem.setEnable(4); // Set enable pin for RS485 transceiver
 ```
 
 ### Multi Device Setup
@@ -167,7 +164,7 @@ pzem.resetEnergy(PZEM_RESET_ENERGY_ALL);
 
 ### Device Configuration
 
-#### For AC Energy Monitors (PZEM-004T/PZEM-014/PZEM-016)
+#### For AC Energy Monitors (PZEM-004T/014/016)
 ```cpp
 // Set power alarm threshold (1W precision for alarm, 0.1W for measurements)
 pzem.setPowerAlarm(2300.0); // 2300W threshold
@@ -210,9 +207,6 @@ uint8_t frequency = pzem.getFrequency(); // Returns 50 or 60 (Hz), or 0 on error
 
 #### For DC Energy Monitors (PZEM-003/017)
 ```cpp
-// For MAX485 module (optional)
-// pzem.setEnable(4); // Set enable pin for RS485 transceiver
-
 // Set voltage alarm thresholds (0.01V precision)
 pzem.setHighVoltageAlarm(300.0); // 300.00V threshold
 pzem.setLowVoltageAlarm(7.0);  // 7.00V threshold
@@ -233,9 +227,18 @@ uint8_t address = pzem.getAddress(); // Returns 0x01
 uint16_t currentRange = pzem.getCurrentRange(); // Returns 300A (PZEM-017 only)
 ```
 
+### Troubleshooting
+```cpp
+// Configure communication timeouts (default: 100ms)
+pzem.setTimeouts(100); // 100ms timeout
+
+// For devices that communicate only through RS485 and use a MAX485 module::
+// pzem.setEnable(4); // Set enable/direction pin for RS485 transceiver
+```
+
 ## Precision and Resolutions
 
-### PZEM-004T/PZEM-014/PZEM-016 (AC Energy Monitors)
+### PZEM-004T/014/016 (AC Energy Monitors)
 
 | Parameter | Resolution | Accuracy | Min Value | Max Value | Unit |
 |-----------|------------|----------|-----------|-----------|------|
@@ -246,22 +249,13 @@ uint16_t currentRange = pzem.getCurrentRange(); // Returns 300A (PZEM-017 only)
 | Frequency | 0.1Hz | ±0.5% | 45Hz | 65Hz | Hz |
 | Power Factor | 0.01 | ±1% | 0.00 | 1.00 | - |
 
-### PZEM-003 (DC Energy Monitor)
+### PZEM-003/017 (DC Energy Monitor)
 
 | Parameter | Resolution | Accuracy | Min Value | Max Value | Unit |
 |-----------|------------|----------|-----------|-----------|------|
 | Voltage | 0.01V | ±1% | 0.05V | 300V | V |
-| Current | 0.01A | ±1% | 0.01A | 10A | A |
-| Power | 0.1W | ±1% | 0.1W | 3000W | W |
-| Energy | 1Wh | ±1% | 0Wh | 9999999Wh | Wh |
-
-### PZEM-017 (DC Energy Monitor)
-
-| Parameter | Resolution | Accuracy | Min Value | Max Value | Unit |
-|-----------|------------|----------|-----------|-----------|------|
-| Voltage | 0.01V | ±1% | 0.05V | 300V | V |
-| Current | 0.01A | ±1% | 0.02A | 300A | A |
-| Power | 0.1W | ±1% | 0.2W | 90000W | W |
+| Current | 0.01A | ±1% | 0.01A (built-in) / 0.02A (external) | 10A (built-in) / 300A (external) | A |
+| Power | 0.1W | ±1% | 0.1W (built-in) / 0.2W (external) | 3000W (built-in) / 90000W (external) | W |
 | Energy | 1Wh | ±1% | 0Wh | 9999999Wh | Wh |
 
 **Current Range Options for PZEM-017:**
@@ -285,15 +279,6 @@ uint16_t currentRange = pzem.getCurrentRange(); // Returns 300A (PZEM-017 only)
 | Reactive Energy | 0.1kVarh | ±1% | 0kVarh | 399999999.9kVarh | kVarh |
 | Apparent Energy | 0.1kVAh | ±1% | 0kVAh | 399999999.9kVAh | kVAh |
 | Phase Angle | 0.01° | - | 0° | 360° | ° |
-
-### Troubleshooting
-```cpp
-// Configure communication timeouts (default: 100ms)
-pzem.setTimeouts(100); // 100ms timeout
-
-// For PZEM-003/017 with MAX485 module
-// pzem.setEnable(4); // Set enable pin for RS485 transceiver
-```
 
 ## Examples
 

@@ -19,7 +19,7 @@
 // #define PZEM_003
 // #define PZEM_017
 // #define PZEM_6L24
-// #define PZEM_IOT_E02
+// #define PZIOT_E02
 
 #include <PZEMPlus.h>
 

@@ -14,7 +14,7 @@ PZEM016	KEYWORD1
 PZEM003	KEYWORD1
 PZEM017	KEYWORD1
 PZEM6L24	KEYWORD1
-PZEMIOTE02	KEYWORD1
+PZIOTE02	KEYWORD1
 
 ########################################################
 # KEYWORD2 (Brown) - Methods and functions

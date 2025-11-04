@@ -1,24 +1,28 @@
 {
   "name": "PZEMPlus",
   "version": "0.7.0",
-  "description": "Arduino/ESP32 library to easily read data from Peacefair energy monitoring devices (PZEM-004T, PZEM-014, PZEM-016, PZEM-003, PZEM-017, PZEM-6L24, PZIOT-E02)",
+  "description": "Arduino/ESP32 library to read data from Peacefair energy monitoring devices (PZEM-004T, PZEM-014/016, PZEM-003/017, PZEM-6L24, PZIOT-E02)",
   "keywords": [
     "pzem",
     "energy",
     "monitoring",
+    "meter",
     "modbus",
     "rtu",
     "rs485",
+    "uart",
+    "serial",
     "peacefair",
     "arduino",
     "esp32",
     "pzem-004t",
+    "pzem004t",
     "pzem-014",
     "pzem-016",
     "pzem-003",
     "pzem-017",
     "pzem-6l24",
-    "pzem-iot-e02"
+    "pziot-e02"
   ],
   "repository": {
     "type": "git",
