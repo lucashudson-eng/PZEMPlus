@@ -11,7 +11,7 @@
  * @brief Constructor for RS485 communication class
  */
 RS485::RS485(Stream* serial)
-    : _serial(serial), _responseTimeout(100), _rs485_en(-1) {
+    : _serial(serial), _responseTimeout(100), _rs485_en(255) {
 }
 
 /**
@@ -628,7 +628,7 @@ bool RS485::setEnable(uint8_t enablePin) {
  * @brief Enable RS485 transmit mode (DE/RE = HIGH)
  */
 void RS485::enableTransmit() {
-    if (_rs485_en >= 0) {
+    if (_rs485_en != 255) {
         digitalWrite(_rs485_en, HIGH);
         delay(1); // Small delay to ensure mode change
     }
@@ -638,7 +638,7 @@ void RS485::enableTransmit() {
  * @brief Enable RS485 receive mode (DE/RE = LOW)
  */
 void RS485::enableReceive() {
-    if (_rs485_en >= 0) {
+    if (_rs485_en != 255) {
         digitalWrite(_rs485_en, LOW);
         delay(1); // Small delay to ensure mode change
     }
