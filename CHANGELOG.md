@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.1] - 2025-11-04
+
+### Fixed
+- **RS485 Enable Pin Initialization**: Fixed `_rs485_en` initialization error by changing sentinel value from `-1` to `255` (0xFF) to properly work with `uint8_t` type
+- **PZIOT-E02 Naming**: Corrected device name consistency across documentation and code
+
+### Changed
+- **Default Parameters**: Added default parameter values to setter methods for improved API usability:
+  - `setAddress()`: Default address values (0x01 for PZEM003/004T/017, 0x00 for PZEM6L24)
+  - `setPowerAlarm()`: Default threshold 2300.0 W
+  - `setHighVoltageAlarm()`: Default threshold 300.0 V
+  - `setLowVoltageAlarm()`: Default threshold 7.0 V
+  - `setFrequency()`: Default frequency 50 Hz
+  - `setBaudrateAndConnectionType()`: Default baudrate 9600 and connection type
+  - `setCurrentRange()`: Default range 100 A
+
+### Improved
+- **API Usability**: Setter methods now have sensible defaults, making configuration easier for common use cases
+- **Type Safety**: Fixed type compatibility issue with RS485 enable pin handling
+
 ## [0.7.0] - 2025-01-27
 
 ### Added
