@@ -264,8 +264,7 @@ bool RS485::writeSingleRegister(uint8_t slaveAddr, uint16_t regAddr, uint16_t va
 
     bool foundSlaveAddr = false;
     
-    // 300ms timeout to wait for response, avoid setting _responseTimeout to low
-    while (millis() - startTime < 300) {
+    while (millis() - startTime < _responseTimeout) {
         yield();
         if (_serial->available()) {
             uint8_t byte = _serial->read();
@@ -370,8 +369,7 @@ bool RS485::writeMultipleRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16
 
     bool foundSlaveAddr = false;
     
-    // 300ms timeout to wait for response, avoid setting _responseTimeout to low
-    while (millis() - startTime < 300) {
+    while (millis() - startTime < _responseTimeout) {
         yield();
         if (_serial->available()) {
             uint8_t byte = _serial->read();
@@ -449,8 +447,7 @@ bool RS485::resetEnergy(uint8_t slaveAddr) {
 
     bool foundSlaveAddr = false;
     
-    // 300ms timeout to wait for response, avoid setting _responseTimeout to low
-    while (millis() - startTime < 300) {
+    while (millis() - startTime < _responseTimeout) {
         yield();
         if (_serial->available()) {
             uint8_t byte = _serial->read();
@@ -534,8 +531,7 @@ bool RS485::resetEnergy(uint8_t slaveAddr, uint8_t phaseSequence) {
 
     bool foundSlaveAddr = false;
     
-    // 300ms timeout to wait for response, avoid setting _responseTimeout to low
-    while (millis() - startTime < 300) {
+    while (millis() - startTime < _responseTimeout) {
         yield();
         if (_serial->available()) {
             uint8_t byte = _serial->read();
