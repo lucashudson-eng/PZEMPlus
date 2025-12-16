@@ -24,6 +24,7 @@
 SoftwareSerial PZEM_SERIAL(PZEM_RX, PZEM_TX);
 #else
 HardwareSerial PZEM_SERIAL(2);
+// EspSoftwareSerial::UART PZEM_SERIAL;
 #endif
 
 #if defined(PZEM_RX) && defined(PZEM_TX) && !defined(__AVR_ATmega328P__)

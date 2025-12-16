@@ -80,6 +80,15 @@ public:
      * @param slaveAddr Slave device address (default: 0xF8)
      */
     PZEM004T(HardwareSerial &serial, uint8_t rxPin, uint8_t txPin, uint8_t slaveAddr = 0xF8);
+ 
+    /**
+     * @brief Constructor for ESP32/ESP8266 with EspSoftwareSerial::UART
+     * @param serial EspSoftwareSerial::UART object reference
+     * @param rxPin RX pin number
+     * @param txPin TX pin number
+     * @param slaveAddr Slave device address (default: 0xF8)
+     */
+    PZEM004T(EspSoftwareSerial::UART &serial, uint8_t rxPin, uint8_t txPin, uint8_t slaveAddr = 0xF8);
 #endif
     
     /** @} */
@@ -202,6 +211,7 @@ private:
 #if !defined(__AVR_ATmega328P__)
     uint8_t _rxPin;      ///< RX pin number (-1 if not used)
     uint8_t _txPin;      ///< TX pin number (-1 if not used)
+    bool _isSoftwareSerial; ///< Flag to indicate if using SoftwareSerial
 #endif
     
 };

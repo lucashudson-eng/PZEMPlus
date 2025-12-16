@@ -18,6 +18,9 @@
  * PZEM-014 devices via Modbus-RTU protocol.
  * It extends the PZEM004T class and provides the same functionality.
  */
-class PZEM014 : public PZEM004T {};
+class PZEM014 : public PZEM004T {
+public:
+    using PZEM004T::PZEM004T;
+};
 
 #endif // PZEM014_H

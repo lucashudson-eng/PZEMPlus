@@ -19,14 +19,21 @@ PZEM6L24::PZEM6L24(SoftwareSerial &serial, uint8_t slaveAddr)
  * @brief Constructor for ESP32/ESP8266 with HardwareSerial
  */
 PZEM6L24::PZEM6L24(HardwareSerial &serial, uint8_t slaveAddr)
-    : RS485(&serial), _slaveAddr(slaveAddr), _rxPin(-1), _txPin(-1) {
+    : RS485(&serial), _slaveAddr(slaveAddr), _rxPin(-1), _txPin(-1), _isSoftwareSerial(false) {
 }
 
 /**
  * @brief Constructor for ESP32/ESP8266 with HardwareSerial and custom pins
  */
 PZEM6L24::PZEM6L24(HardwareSerial &serial, uint8_t rxPin, uint8_t txPin, uint8_t slaveAddr)
-    : RS485(&serial), _slaveAddr(slaveAddr), _rxPin(rxPin), _txPin(txPin) {
+    : RS485(&serial), _slaveAddr(slaveAddr), _rxPin(rxPin), _txPin(txPin), _isSoftwareSerial(false) {
+}
+
+/**
+ * @brief Constructor for ESP32/ESP8266 with EspSoftwareSerial::UART
+ */
+PZEM6L24::PZEM6L24(EspSoftwareSerial::UART &serial, uint8_t rxPin, uint8_t txPin, uint8_t slaveAddr)
+    : RS485(&serial), _slaveAddr(slaveAddr), _rxPin(rxPin), _txPin(txPin), _isSoftwareSerial(true) {
 }
 #endif
 
@@ -37,10 +44,15 @@ void PZEM6L24::begin(uint32_t baudrate) {
     #if defined(__AVR_ATmega328P__)
         ((SoftwareSerial*)getSerial())->begin(baudrate);
     #else
-        if (_rxPin != -1 && _txPin != -1) {
-            ((HardwareSerial*)getSerial())->begin(baudrate, SERIAL_8N1, _rxPin, _txPin);
+        if (_isSoftwareSerial) {
+            ((EspSoftwareSerial::UART*)getSerial())->begin(baudrate, SWSERIAL_8N1, _rxPin, _txPin, false);
+            ((EspSoftwareSerial::UART*)getSerial())->enableIntTx(false);
         } else {
-            ((HardwareSerial*)getSerial())->begin(baudrate);
+            if (_rxPin != -1 && _txPin != -1) {
+                ((HardwareSerial*)getSerial())->begin(baudrate, SERIAL_8N1, _rxPin, _txPin);
+            } else {
+                ((HardwareSerial*)getSerial())->begin(baudrate);
+            }
         }
     #endif
     clearBuffer();
@@ -591,10 +603,14 @@ bool PZEM6L24::setBaudrateAndConnectionType(uint32_t baudrate, uint8_t connectio
         #if defined(__AVR_ATmega328P__)
             ((SoftwareSerial*)getSerial())->begin(baudrate);
         #else
-            if (_rxPin != -1 && _txPin != -1) {
-                ((HardwareSerial*)getSerial())->begin(baudrate, SERIAL_8N1, _rxPin, _txPin);
+            if (_isSoftwareSerial) {
+                 ((EspSoftwareSerial::UART*)getSerial())->begin(baudrate, SWSERIAL_8N1, _rxPin, _txPin);
             } else {
-                ((HardwareSerial*)getSerial())->begin(baudrate);
+                if (_rxPin != -1 && _txPin != -1) {
+                    ((HardwareSerial*)getSerial())->begin(baudrate, SERIAL_8N1, _rxPin, _txPin);
+                } else {
+                    ((HardwareSerial*)getSerial())->begin(baudrate);
+                }
             }
         #endif
         clearBuffer();

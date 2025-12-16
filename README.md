@@ -280,6 +280,10 @@ pzem.setTimeouts(100); // 100ms timeout
 | Apparent Energy | 0.1kVAh | ±1% | 0kVAh | 399999999.9kVAh | kVAh |
 | Phase Angle | 0.01° | - | 0° | 360° | ° |
 
+#### Important Notes for PZEM-6L24
+- **Baudrate Configuration**: Changing the baudrate using ESP32 `HardwareSerial` may encounter issues. It might work correctly on other microcontrollers, but on ESP32 it can be unstable.
+- **Software Serial**: You can use `EspSoftwareSerial` as an alternative, but it is reliable only up to **57600 baud**. 115200 baud is **not supported** / unstable with software serial on this device.
+
 ## Examples
 
 The library includes comprehensive examples for all supported devices:

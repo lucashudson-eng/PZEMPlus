@@ -33,6 +33,8 @@
  */
 class PZEM017 : public PZEM003 {
 public:
+    using PZEM003::PZEM003;
+
     /**
      * @brief Set current range (PZEM-017 only)
      * @param range Current range value (50, 100, 200, or 300 amperes)

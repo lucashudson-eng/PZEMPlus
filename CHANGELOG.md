@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.3] - 2025-12-16
+
+### Added
+- **EspSoftwareSerial Support**: Added support for EspSoftwareSerial library (on PZEM6L24, works up to 57600 baud, 115200 not supported)
+
+## [0.7.2] - 2025-12-16
+
+### Added
+- **Yield Integration**: Added `yield()` call in `src/RS485.cpp` for better ESP8266/ESP32 compatibility
+- **Configurable Timeout**: Replaced fixed 300ms timeout with configurable timeout in all methods
+
+### Changed
+- **Timeout Management**: All methods now use the configured timeout value instead of hardcoded 300ms
+
 ## [0.7.1] - 2025-11-04
 
 ### Fixed

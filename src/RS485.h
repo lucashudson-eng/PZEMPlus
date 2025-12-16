@@ -9,9 +9,7 @@
 #define RS485_H
 
 #include <Arduino.h>
-#if defined(__AVR_ATmega328P__)
 #include <SoftwareSerial.h>
-#endif
 
 /**
  * @defgroup ModbusFunctionCodes Modbus-RTU Function Codes
