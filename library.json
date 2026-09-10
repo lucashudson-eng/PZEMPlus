@@ -41,11 +41,6 @@
     "arduino"
   ],
   "platforms": "*",
-  "dependencies": [
-    {
-      "name": "EspSoftwareSerial"
-    }
-  ],
   "export": {
     "include": [
       "src/*",

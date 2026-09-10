@@ -146,7 +146,9 @@ public:
      * @param txPin TX pin number
      * @param slaveAddr Slave device address (default: 0xF8)
      */
+#if defined(PZEMPLUS_HAS_ESP_SOFTWARE_SERIAL)
     PZEM6L24(EspSoftwareSerial::UART &serial, uint8_t rxPin, uint8_t txPin, uint8_t slaveAddr = 0xF8);
+#endif
 #endif
     
     /** @} */
@@ -488,8 +490,8 @@ public:
 private:
     uint8_t _slaveAddr;  ///< Current slave device address
 #if !defined(__AVR_ATmega328P__)
-    uint8_t _rxPin;      ///< RX pin number (-1 if not used)
-    uint8_t _txPin;      ///< TX pin number (-1 if not used)
+    int16_t _rxPin;      ///< RX pin number (-1 if not used)
+    int16_t _txPin;      ///< TX pin number (-1 if not used)
     bool _isSoftwareSerial; ///< Flag to indicate if using SoftwareSerial
 #endif
 };

@@ -9,7 +9,19 @@
 #define RS485_H
 
 #include <Arduino.h>
+
+#if defined(__AVR_ATmega328P__)
 #include <SoftwareSerial.h>
+#define PZEMPLUS_HAS_AVR_SOFTWARE_SERIAL
+#else
+#include <HardwareSerial.h>
+#if defined(__has_include)
+#if __has_include(<SoftwareSerial.h>)
+#include <SoftwareSerial.h>
+#define PZEMPLUS_HAS_ESP_SOFTWARE_SERIAL
+#endif
+#endif
+#endif
 
 /**
  * @defgroup ModbusFunctionCodes Modbus-RTU Function Codes
@@ -115,7 +127,7 @@ public:
      * @param length Length of data buffer
      * @return Calculated CRC16 value
      */
-    uint16_t calculateCRC16(uint8_t* data, uint8_t length);
+    uint16_t calculateCRC16(uint8_t* data, uint16_t length);
     
     /**
      * @brief Verify Modbus CRC16 checksum in received data
@@ -123,7 +135,7 @@ public:
      * @param length Total length of data buffer including CRC
      * @return true if CRC is valid, false otherwise
      */
-    bool verifyCRC16(uint8_t* data, uint8_t length);
+    bool verifyCRC16(uint8_t* data, uint16_t length);
     
     /**
      * @brief Set communication timeout

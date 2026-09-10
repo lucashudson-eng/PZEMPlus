@@ -32,9 +32,11 @@ PZEM004T::PZEM004T(HardwareSerial &serial, uint8_t rxPin, uint8_t txPin, uint8_t
 /**
  * @brief Constructor for ESP32/ESP8266 with EspSoftwareSerial::UART
  */
+#if defined(PZEMPLUS_HAS_ESP_SOFTWARE_SERIAL)
 PZEM004T::PZEM004T(EspSoftwareSerial::UART &serial, uint8_t rxPin, uint8_t txPin, uint8_t slaveAddr) 
     : RS485(&serial), _slaveAddr(slaveAddr), _rxPin(rxPin), _txPin(txPin), _isSoftwareSerial(true) {
 }
+#endif
 #endif
 
 /**
@@ -44,9 +46,12 @@ void PZEM004T::begin(uint32_t baudrate){
     #if defined(__AVR_ATmega328P__)
         ((SoftwareSerial*)getSerial())->begin(baudrate);
     #else
+#if defined(PZEMPLUS_HAS_ESP_SOFTWARE_SERIAL)
         if (_isSoftwareSerial) {
              ((EspSoftwareSerial::UART*)getSerial())->begin(baudrate, SWSERIAL_8N1, _rxPin, _txPin, false);
-        } else {
+        } else
+#endif
+        {
             if (_rxPin != -1 && _txPin != -1){
                 ((HardwareSerial*)getSerial())->begin(baudrate, SERIAL_8N1, _rxPin, _txPin);
             } else {
@@ -217,4 +222,3 @@ uint8_t PZEM004T::getAddress() {
 bool PZEM004T::resetEnergy() {
     return RS485::resetEnergy(_slaveAddr);
 }
-
