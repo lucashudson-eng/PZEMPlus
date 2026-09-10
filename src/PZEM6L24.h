@@ -490,8 +490,8 @@ public:
 private:
     uint8_t _slaveAddr;  ///< Current slave device address
 #if !defined(__AVR_ATmega328P__)
-    uint8_t _rxPin;      ///< RX pin number (-1 if not used)
-    uint8_t _txPin;      ///< TX pin number (-1 if not used)
+    int16_t _rxPin;      ///< RX pin number (-1 if not used)
+    int16_t _txPin;      ///< TX pin number (-1 if not used)
     bool _isSoftwareSerial; ///< Flag to indicate if using SoftwareSerial
 #endif
 };

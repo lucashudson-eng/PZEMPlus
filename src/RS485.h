@@ -127,7 +127,7 @@ public:
      * @param length Length of data buffer
      * @return Calculated CRC16 value
      */
-    uint16_t calculateCRC16(uint8_t* data, uint8_t length);
+    uint16_t calculateCRC16(uint8_t* data, uint16_t length);
     
     /**
      * @brief Verify Modbus CRC16 checksum in received data
@@ -135,7 +135,7 @@ public:
      * @param length Total length of data buffer including CRC
      * @return true if CRC is valid, false otherwise
      */
-    bool verifyCRC16(uint8_t* data, uint8_t length);
+    bool verifyCRC16(uint8_t* data, uint16_t length);
     
     /**
      * @brief Set communication timeout

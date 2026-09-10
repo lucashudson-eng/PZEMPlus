@@ -48,12 +48,12 @@ bool RS485::readHoldingRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t
     
     // Receive optimized response
     uint8_t response[256];
-    uint8_t responseLength = 0;
+    uint16_t responseLength = 0;
     uint32_t startTime = millis();
     uint32_t lastByteTime = 0;
     
     // Calculate minimum expected bytes: 3 (header) + 2*numRegs (data) + 2 (CRC)
-    uint8_t minBytesExpected = 3 + (2 * numRegs) + 2;
+    uint16_t minBytesExpected = 3 + (2 * numRegs) + 2;
 
     bool foundSlaveAddr = false;
     
@@ -148,12 +148,12 @@ bool RS485::readInputRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t n
     
     // Receive optimized response - exit when all bytes received
     uint8_t response[256];
-    uint8_t responseLength = 0;
+    uint16_t responseLength = 0;
     uint32_t startTime = millis();
     uint32_t lastByteTime = 0;
     
     // Calculate minimum expected bytes: 3 (header) + 2*numRegs (data) + 2 (CRC)
-    uint8_t minBytesExpected = 3 + (2 * numRegs) + 2;
+    uint16_t minBytesExpected = 3 + (2 * numRegs) + 2;
 
     bool foundSlaveAddr = false;
     
@@ -255,12 +255,12 @@ bool RS485::writeSingleRegister(uint8_t slaveAddr, uint16_t regAddr, uint16_t va
     
     // Receive optimized response
     uint8_t response[8];
-    uint8_t responseLength = 0;
+    uint16_t responseLength = 0;
     uint32_t startTime = millis();
     uint32_t lastByteTime = 0;
     
     // For writeSingleRegister: 1 (address) + 1 (function) + 2 (register addr) + 2 (register value) + 2 (CRC) = 8 bytes minimum
-    uint8_t minBytesExpected = 8;
+    uint16_t minBytesExpected = 8;
 
     bool foundSlaveAddr = false;
     
@@ -309,7 +309,7 @@ bool RS485::writeSingleRegister(uint8_t slaveAddr, uint16_t regAddr, uint16_t va
  */
 bool RS485::writeMultipleRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16_t numRegs, uint16_t* data, bool big_endian) {
     // Calculate total bytes needed: 6 (header) + 1 (byte count) + 2*numRegs (data) + 2 (CRC)
-    uint8_t totalBytes = 6 + 1 + (2 * numRegs) + 2;
+    uint32_t totalBytes = 6 + 1 + (2 * numRegs) + 2;
     uint8_t request[256]; // Buffer for request
     
     if (totalBytes > sizeof(request)) {
@@ -360,12 +360,12 @@ bool RS485::writeMultipleRegisters(uint8_t slaveAddr, uint16_t startAddr, uint16
     
     // Receive optimized response
     uint8_t response[8];
-    uint8_t responseLength = 0;
+    uint16_t responseLength = 0;
     uint32_t startTime = millis();
     uint32_t lastByteTime = 0;
     
     // For writeMultipleRegisters: 1 (address) + 1 (function) + 2 (register addr) + 2 (register quantity) + 2 (CRC) = 8 bytes minimum
-    uint8_t minBytesExpected = 8;
+    uint16_t minBytesExpected = 8;
 
     bool foundSlaveAddr = false;
     
@@ -438,12 +438,12 @@ bool RS485::resetEnergy(uint8_t slaveAddr) {
     
     // Receive optimized response
     uint8_t response[4];
-    uint8_t responseLength = 0;
+    uint16_t responseLength = 0;
     uint32_t startTime = millis();
     uint32_t lastByteTime = 0;
     
     // For resetEnergy: 1 (address) + 1 (function) + 2 (CRC) = 4 bytes minimum
-    uint8_t minBytesExpected = 4;
+    uint16_t minBytesExpected = 4;
 
     bool foundSlaveAddr = false;
     
@@ -522,12 +522,12 @@ bool RS485::resetEnergy(uint8_t slaveAddr, uint8_t phaseSequence) {
     
     // Receive optimized response
     uint8_t response[6];
-    uint8_t responseLength = 0;
+    uint16_t responseLength = 0;
     uint32_t startTime = millis();
     uint32_t lastByteTime = 0;
     
     // For resetEnergy with phase: 1 (address) + 1 (function) + 1 (reserved) + 1 (phase) + 2 (CRC) = 6 bytes minimum
-    uint8_t minBytesExpected = 6;
+    uint16_t minBytesExpected = 6;
 
     bool foundSlaveAddr = false;
     
@@ -577,7 +577,7 @@ bool RS485::resetEnergy(uint8_t slaveAddr, uint8_t phaseSequence) {
  * 
  * Implements the standard Modbus CRC16 algorithm with polynomial 0xA001.
  */
-uint16_t RS485::calculateCRC16(uint8_t* data, uint8_t length) {
+uint16_t RS485::calculateCRC16(uint8_t* data, uint16_t length) {
     uint16_t crc = 0xFFFF;
     
     for (uint8_t i = 0; i < length; i++) {
@@ -598,7 +598,7 @@ uint16_t RS485::calculateCRC16(uint8_t* data, uint8_t length) {
 /**
  * @brief Verify Modbus CRC16 checksum in received data
  */
-bool RS485::verifyCRC16(uint8_t* data, uint8_t length) {
+bool RS485::verifyCRC16(uint8_t* data, uint16_t length) {
     if (length < 2) {
         return false;
     }
