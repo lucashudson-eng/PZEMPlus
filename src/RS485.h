@@ -9,7 +9,19 @@
 #define RS485_H
 
 #include <Arduino.h>
+
+#if defined(__AVR_ATmega328P__)
 #include <SoftwareSerial.h>
+#define PZEMPLUS_HAS_AVR_SOFTWARE_SERIAL
+#else
+#include <HardwareSerial.h>
+#if defined(__has_include)
+#if __has_include(<SoftwareSerial.h>)
+#include <SoftwareSerial.h>
+#define PZEMPLUS_HAS_ESP_SOFTWARE_SERIAL
+#endif
+#endif
+#endif
 
 /**
  * @defgroup ModbusFunctionCodes Modbus-RTU Function Codes

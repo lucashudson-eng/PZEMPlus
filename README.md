@@ -282,7 +282,7 @@ pzem.setTimeouts(100); // 100ms timeout
 
 #### Important Notes for PZEM-6L24
 - **Baudrate Configuration**: Changing the baudrate using ESP32 `HardwareSerial` may encounter issues. It might work correctly on other microcontrollers, but on ESP32 it can be unstable.
-- **Software Serial**: You can use `EspSoftwareSerial` as an alternative, but it is reliable only up to **57600 baud**. 115200 baud is **not supported** / unstable with software serial on this device.
+- **Software Serial**: You can use `EspSoftwareSerial` as an alternative, but it is reliable only up to **57600 baud**. 115200 baud is **not supported** / unstable with software serial on this device. Install `EspSoftwareSerial` separately when using this option; it is not required for hardware UART support.
 
 ## Examples
 
@@ -352,4 +352,3 @@ The library includes comprehensive examples for all supported devices:
 - ✅ **PZEM-017**: Complete implementation with full feature set (extends from PZEM-003 to add current range)
 - ✅ **PZEM-6L24**: Complete implementation with full feature set
 - 🚧 **PZIOT-E02**: Class structure created, implementation pending
-

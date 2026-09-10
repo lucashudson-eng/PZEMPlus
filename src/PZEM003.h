@@ -86,7 +86,9 @@ public:
      * @param txPin TX pin number
      * @param slaveAddr Slave device address (default: 0xF8)
      */
+#if defined(PZEMPLUS_HAS_ESP_SOFTWARE_SERIAL)
     PZEM003(EspSoftwareSerial::UART &serial, uint8_t rxPin, uint8_t txPin, uint8_t slaveAddr = 0xF8);
+#endif
 #endif
     
     /** @} */
